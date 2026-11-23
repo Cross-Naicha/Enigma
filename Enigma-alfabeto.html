@@ -247,7 +247,7 @@
       }
       .editor-info {
         display: grid;
-        grid-template-columns: 1fr 108px;
+        grid-template-columns: minmax(0, 1fr) 108px minmax(0, 1fr);
         gap: 12px;
         margin-bottom: 15px;
       }
@@ -611,6 +611,7 @@
         .editor-info {
           grid-template-columns: minmax(0, 1fr) 92px;
         }
+        .editor-group-field { grid-column: 1 / -1; }
         .keyboard-grid {
           --key-width: 91px;
         }
@@ -865,32 +866,80 @@
       }
       .editor-glyphs {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
-        gap: 6px;
-        max-height: 180px;
-        overflow: auto;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr));
+        gap: 10px;
         padding: 2px;
       }
-      .editor-glyph {
+      .editor-gallery-layout {
         display: grid;
-        justify-items: center;
-        align-content: center;
-        gap: 4px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
+        gap: 12px;
+        align-items: start;
+      }
+      .editor-group-list, .editor-gallery-content {
         min-width: 0;
-        padding: 5px;
+        max-height: 66dvh;
+        overflow: auto;
+        overscroll-behavior: contain;
+        padding: 3px;
       }
-      .editor-glyph span {
-        display: block;
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 0.75rem;
+      .editor-group-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
       }
-      .editor-glyph[aria-pressed="true"] {
+      .editor-group {
+        border-radius: 9px;
+        padding: 7px 10px;
+        text-align: left;
+        overflow-wrap: anywhere;
+      }
+      .editor-group[aria-pressed="true"] {
+        color: var(--accent);
         border-color: var(--accent);
-        background: #203a3a;
       }
+      .editor-group-count {
+        display: block;
+        color: var(--muted);
+        font-size: .75rem;
+      }
+      @media (max-width: 600px) {
+        .editor-gallery-layout { gap: 6px; }
+        .editor-group { padding: 5px 3px; font-size: .73rem; }
+      }
+      #glyphGalleryStatus:empty { display: none; }
+      .editor-view-tools, .gallery-tools, .gallery-card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .editor-view-tools [aria-pressed="true"] {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .gallery-tools .field { flex: 1 1 185px; }
+      .gallery-tools { align-items: end; }
+      .gallery-card {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px;
+      }
+      .gallery-card label { cursor: pointer; display: block; overflow-wrap: anywhere; }
+      .gallery-card input { width: 16px; min-height: 0; height: 16px; accent-color: var(--accent); }
+      .gallery-card .key-art { width: 88px; height: 88px; margin: 4px auto; }
+      .gallery-card-actions { margin: 8px 0 0; gap: 5px; }
+      .gallery-card-actions button { padding: 5px 7px; font-size: .75rem; }
+      .gallery-comparison:not([hidden]) {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .gallery-comparison figure { margin: 0; padding: 8px; border: 1px solid var(--line); border-radius: 10px; text-align: center; overflow-wrap: anywhere; }
+      .gallery-comparison .key-art { width: min(100%, 180px); height: auto; aspect-ratio: 1; margin: auto; }
       @media (max-width: 600px) {
         .composer-panel .panel-body {
           gap: 6px;
@@ -1008,7 +1057,8 @@
           .message-zoom,
           #expandComposerBtn,
           #invertMessageBtn,
-          #toggleKeyboardBtn
+          #toggleKeyboardBtn,
+          #writingModeBtn
         ),
       .composer-expanded .composer-panel .reference {
         display: none;
@@ -1017,9 +1067,10 @@
         padding: 6px;
         gap: 6px;
       }
-      .composer-expanded #toggleKeyboardBtn {
+      .composer-expanded #writingModeBtn {
         margin-left: auto;
       }
+      .composer-expanded #writingModeBtn,
       .composer-expanded #toggleKeyboardBtn,
       .composer-expanded #invertMessageBtn,
       .composer-expanded #expandComposerBtn {
@@ -1146,6 +1197,43 @@
       .keyboard-grid[hidden] {
         display: none;
       }
+      #writingModeBtn[aria-pressed="true"] {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .keyboard-filter:not([hidden]) {
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 3px;
+      }
+      .keyboard-group-tag {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        gap: 5px;
+        max-width: 100%;
+        padding: 5px 8px;
+        border-radius: 999px;
+        text-align: left;
+      }
+      .keyboard-group-tag > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .keyboard-group-tag .key-art {
+        flex: none;
+        width: 22px;
+        height: 22px;
+      }
+      .keyboard-group-tag[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: #203a3a;
+        color: var(--accent);
+      }
       .language-controls {
         display: flex;
         align-items: center;
@@ -1170,6 +1258,71 @@
       .png-options select {
         max-width: 100%;
       }
+      .decode-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 290px);
+        gap: 14px;
+      }
+      .decode-message {
+        min-width: 0;
+        min-height: 180px;
+        max-height: 65dvh;
+        overflow: auto;
+        padding: 14px;
+        border-radius: 12px;
+        background: var(--paper);
+        color: var(--paper-ink);
+      }
+      .decode-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 3px;
+        min-height: 44px;
+      }
+      .decode-space { width: 16px; }
+      .decode-punctuation { font-size: 1.35rem; }
+      .decode-word {
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 100%;
+        align-items: center;
+        padding: 3px;
+        gap: 2px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: inherit;
+      }
+      .decode-word:not(:disabled):hover { background: #e2ece4; }
+      .decode-word.is-match, .decode-word.is-match:not(:disabled):hover { background: #ffe59a; }
+      .decode-letter.is-match { background: #ffcd62; border-radius: 6px; }
+      .decode-letter svg { width: 38px; height: 38px; }
+      .decode-tools { min-width: 0; }
+      .decode-tools .field { margin-bottom: 10px; }
+      .decode-results {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        max-height: 42dvh;
+        overflow: auto;
+      }
+      .decode-result {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 7px;
+      }
+      .decode-result[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+      .decode-result-glyphs { display: flex; flex-wrap: wrap; }
+      .decode-result svg { width: 26px; height: 26px; }
+      .decode-status { color: var(--muted); font-size: .83rem; margin-block: 10px; }
+      @media (max-width: 680px) {
+        .decode-layout { grid-template-columns: minmax(0, 1fr); }
+        .decode-message { max-height: 44dvh; }
+        .decode-results { max-height: 30dvh; }
+      }
       .brand h1 {
         font-size: clamp(1.4rem, 3vw, 2.1rem);
       }
@@ -1181,6 +1334,10 @@
         align-items: center;
         gap: 8px;
         margin-bottom: 12px;
+      }
+      #eraserBtn[aria-pressed="true"] {
+        border-color: var(--accent);
+        color: var(--accent);
       }
       #drawingStrokes circle {
         fill: #000;
@@ -1308,6 +1465,9 @@
         >
           Editor de caracteres
         </button>
+        <button type="button" id="decodeTab" role="tab" aria-controls="decodePanel" aria-selected="false" tabindex="-1">
+          Decodificación
+        </button>
       </div>
       <div class="workspace">
         <section
@@ -1322,109 +1482,140 @@
               <h2 id="editorTitle">Editor de caracteres</h2>
               <p>Dibujá un símbolo con el mouse, lápiz o dedo.</p>
             </div>
-            <span class="section-tag" id="editorMode">Nuevo glifo</span>
+            <span class="section-tag" id="editorMode" hidden>Nuevo glifo</span>
           </div>
           <div class="panel-body">
+            <div class="editor-view-tools" role="group" aria-label="Vista de caracteres">
+              <button type="button" id="showGlyphGallery" aria-controls="editorGallery" aria-pressed="true">Visualización</button>
+              <button type="button" id="showGlyphEditing" aria-controls="glyphEditing" aria-pressed="false">Edición</button>
+              <button type="button" id="newGalleryGlyph">Nuevo glifo</button>
+            </div>
+            <datalist id="glyphGroupNames"></datalist>
             <section
               id="editorGallery"
               class="editor-gallery"
               aria-labelledby="editorGalleryTitle"
-              hidden
             >
               <h3 id="editorGalleryTitle">Glifos existentes</h3>
-              <div id="editorGlyphs" class="editor-glyphs"></div>
+              <div class="gallery-tools">
+                <div class="field">
+                  <label for="glyphSearch">Buscar glifos</label>
+                  <input type="search" id="glyphSearch" placeholder="Nombre, tecla o grupo">
+                </div>
+                <div class="field">
+                  <label for="bulkGlyphGroup">Grupo para los seleccionados</label>
+                  <input id="bulkGlyphGroup" list="glyphGroupNames" maxlength="48" placeholder="Vacío para quitar el grupo">
+                </div>
+                <button type="button" id="applyGlyphGroup" disabled>Aplicar grupo</button>
+                <button type="button" id="compareGlyphs" disabled>Comparar dos glifos</button>
+              </div>
+              <p class="hint" id="glyphGalleryStatus" role="status"></p>
+              <div class="editor-gallery-layout">
+                <nav id="editorGroupList" class="editor-group-list" aria-label="Grupos de glifos"></nav>
+                <div class="editor-gallery-content">
+                  <div id="glyphComparison" class="gallery-comparison" aria-label="Comparación de glifos" hidden></div>
+                  <div id="editorGlyphs" class="editor-glyphs"></div>
+                </div>
+              </div>
             </section>
-            <div class="editor-info">
-              <div class="field">
-                <label for="glyphName">Nombre o significado</label
-                ><input
-                  id="glyphName"
-                  maxlength="48"
-                  placeholder="Ej. letra A (opcional)"
-                  autocomplete="off"
-                />
+            <div id="glyphEditing" hidden>
+              <div class="editor-info">
+                <div class="field">
+                  <label for="glyphName">Nombre o significado</label
+                  ><input
+                    id="glyphName"
+                    maxlength="48"
+                    placeholder="Ej. letra A (opcional)"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="field">
+                  <label for="glyphKey">Tecla</label
+                  ><input
+                    id="glyphKey"
+                    maxlength="2"
+                    placeholder="Ej. A"
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                </div>
+                <div class="field editor-group-field">
+                  <label for="glyphGroup">Grupo</label>
+                  <input id="glyphGroup" list="glyphGroupNames" maxlength="48" placeholder="Elegí o creá un grupo">
+                </div>
               </div>
-              <div class="field">
-                <label for="glyphKey">Tecla</label
-                ><input
-                  id="glyphKey"
-                  maxlength="2"
-                  placeholder="Ej. A"
-                  autocomplete="off"
-                  spellcheck="false"
-                />
+              <div class="drawing-tool-picker">
+                <label for="drawingTool">Herramienta</label>
+                <select id="drawingTool" class="punctuation-picker">
+                  <option value="freehand">Mano alzada</option>
+                  <option value="combined">Rectas y puntos</option>
+                  <option value="segment">Línea recta</option>
+                  <option value="dot">Círculo relleno</option>
+                </select>
               </div>
-            </div>
-            <div class="drawing-tool-picker">
-              <label for="drawingTool">Herramienta</label>
-              <select id="drawingTool" class="punctuation-picker">
-                <option value="freehand">Mano alzada</option>
-                <option value="combined">Rectas y puntos</option>
-                <option value="segment">Línea recta</option>
-                <option value="dot">Círculo relleno</option>
-              </select>
-            </div>
-            <div class="board-layout">
-              <div class="drawing-board has-grid" id="drawingBoard">
-                <svg
-                  id="drawingSvg"
-                  viewBox="0 0 320 320"
-                  aria-label="Lienzo para dibujar el carácter"
-                  role="img"
+              <div class="board-layout">
+                <div class="drawing-board has-grid" id="drawingBoard">
+                  <svg
+                    id="drawingSvg"
+                    viewBox="0 0 320 320"
+                    aria-label="Lienzo para dibujar el carácter"
+                    role="img"
+                  >
+                    <g id="drawingStrokes"></g>
+                  </svg>
+                </div>
+                <div class="board-guides">
+                  <span>Área de dibujo</span><span>320 × 320</span>
+                </div>
+              </div>
+              <div class="tools-row">
+                <div class="stroke-control">
+                  <label for="strokeWidth">Grosor</label
+                  ><input
+                    id="strokeWidth"
+                    type="range"
+                    min="2"
+                    max="18"
+                    value="7"
+                  /><span
+                    class="stroke-sample"
+                    id="strokeSample"
+                    aria-hidden="true"
+                    style="width: 7px; height: 7px"
+                  ></span>
+                </div>
+                <button type="button" id="eraserBtn" aria-pressed="false">Borrador de trazos</button>
+                <button
+                  id="gridBtn"
+                  aria-pressed="true"
+                  title="Mostrar u ocultar cuadrícula"
                 >
-                  <g id="drawingStrokes"></g>
-                </svg>
+                  Cuadrícula ✓
+                </button>
+                <button id="undoBtn" title="Deshacer último trazo" disabled>
+                  Deshacer</button
+                ><button id="clearDrawingBtn" disabled>Limpiar</button>
               </div>
-              <div class="board-guides">
-                <span>Área de dibujo</span><span>320 × 320</span>
-              </div>
-            </div>
-            <div class="tools-row">
-              <div class="stroke-control">
-                <label for="strokeWidth">Grosor</label
-                ><input
-                  id="strokeWidth"
-                  type="range"
-                  min="2"
-                  max="18"
-                  value="7"
-                /><span
-                  class="stroke-sample"
-                  id="strokeSample"
-                  aria-hidden="true"
-                  style="width: 7px; height: 7px"
-                ></span>
-              </div>
-              <button
-                id="gridBtn"
-                aria-pressed="true"
-                title="Mostrar u ocultar cuadrícula"
+              <label class="keep-template"
+                ><input type="checkbox" id="keepGlyphTemplate" />Conservar el
+                dibujo como plantilla al guardar</label
               >
-                Cuadrícula ✓
-              </button>
-              <button id="undoBtn" title="Deshacer último trazo" disabled>
-                Deshacer</button
-              ><button id="clearDrawingBtn" disabled>Limpiar</button>
-            </div>
-            <label class="keep-template"
-              ><input type="checkbox" id="keepGlyphTemplate" />Conservar el
-              dibujo como plantilla al guardar</label
-            >
-            <div class="editor-footer">
-              <div class="left-actions">
-                <button id="newBtn" class="ghost">Nuevo</button
-                ><button type="button" id="useGlyphTemplate" class="hidden">
-                  Usar como plantilla</button
-                ><button id="deleteBtn" class="danger hidden">Eliminar</button>
+              <div class="editor-footer">
+                <div class="left-actions">
+                  <button id="newBtn" class="ghost">Nuevo</button
+                  ><button type="button" id="useGlyphTemplate" class="hidden">
+                    Usar como plantilla</button
+                  ><button id="deleteBtn" class="danger hidden">Eliminar</button>
+                </div>
+                <button class="primary" id="saveGlyphBtn" disabled>
+                  Guardar glifo
+                </button>
               </div>
-              <button class="primary" id="saveGlyphBtn" disabled>
-                Guardar glifo
-              </button>
+              <p class="hint">
+                Cada símbolo guarda sus trazos originales: podés editarlo más
+                adelante sin volver a dibujarlo.
+              </p>
             </div>
-            <p class="hint">
-              Cada símbolo guarda sus trazos originales: podés editarlo más
-              adelante sin volver a dibujarlo.
-            </p>
           </div>
         </section>
 
@@ -1481,6 +1672,7 @@
                 <option>&#45;</option>
               </select>
               <input type="file" id="sourceImageFile" accept="image/*" hidden />
+              <button type="button" id="writingModeBtn" aria-pressed="false" aria-controls="keyboardFilter">Modo escritura</button>
               <button
                 type="button"
                 id="toggleKeyboardBtn"
@@ -1575,6 +1767,7 @@
               ><span id="referenceText"></span>
             </div>
 
+            <div id="keyboardFilter" class="keyboard-filter" role="group" aria-label="Grupos del teclado" hidden></div>
             <div
               class="keyboard-grid"
               id="virtualKeyboard"
@@ -1602,6 +1795,41 @@
               Las letras dibujadas son imágenes vectoriales, no caracteres
               Unicode. Descargá el mensaje como PNG para compartirlo tal cual.
             </p>
+          </div>
+        </section>
+        <section class="panel" id="decodePanel" role="tabpanel" aria-labelledby="decodeTab" hidden>
+          <div class="panel-header">
+            <h2>Decodificación</h2>
+            <div class="message-zoom">
+              <label for="decodeZoom">Zoom</label>
+              <input type="range" id="decodeZoom" min="40" max="175" step="5" value="100">
+              <output id="decodeZoomValue" for="decodeZoom">100%</output>
+            </div>
+          </div>
+          <div class="panel-body decode-layout">
+            <div class="decode-message" aria-label="Mensaje para analizar" tabindex="0">
+              <div id="decodeMessage"></div>
+            </div>
+            <div class="decode-tools">
+              <div class="field">
+                <label for="decodeMode">Resaltar</label>
+                <select id="decodeMode" class="punctuation-picker">
+                  <option value="repeated">Palabras repetidas</option>
+                  <option value="unique">Palabras únicas</option>
+                  <option value="same">Palabras iguales a la seleccionada</option>
+                  <option value="length">Longitud de palabra</option>
+                  <option value="letters">Letras repetidas dentro de una palabra</option>
+                  <option value="shared">Letras repetidas en palabras distintas</option>
+                  <option value="frequency">Frecuencia de glifos</option>
+                </select>
+              </div>
+              <div class="field hidden" id="decodeLengthField">
+                <label for="decodeLength">Cantidad de letras</label>
+                <select id="decodeLength" class="punctuation-picker"></select>
+              </div>
+              <p id="decodeStatus" class="decode-status" role="status"></p>
+              <div id="decodeResults" class="decode-results"></div>
+            </div>
           </div>
         </section>
       </div>
@@ -1705,7 +1933,7 @@
         let strokePx = Number($("strokeWidth").value);
         let pendingGeometry = null;
 
-        const viewTabs = [$("composerTab"), $("editorTab")];
+        const viewTabs = [$("composerTab"), $("editorTab"), $("decodeTab")];
 
         function showView(activeTab) {
           for (const tab of viewTabs) {
@@ -1714,16 +1942,17 @@
             tab.tabIndex = selected ? 0 : -1;
             $(tab.getAttribute("aria-controls")).hidden = !selected;
           }
+          if (activeTab === $("decodeTab")) renderDecoding();
         }
 
         for (const [index, tab] of viewTabs.entries()) {
           tab.addEventListener("click", () => showView(tab));
           tab.addEventListener("keydown", (event) => {
             const nextTab = {
-              ArrowLeft: viewTabs[1 - index],
-              ArrowRight: viewTabs[1 - index],
+              ArrowLeft: viewTabs[(index + viewTabs.length - 1) % viewTabs.length],
+              ArrowRight: viewTabs[(index + 1) % viewTabs.length],
               Home: viewTabs[0],
-              End: viewTabs[1],
+              End: viewTabs.at(-1),
             }[event.key];
             if (!viewTabs.includes(nextTab)) return;
 
@@ -1819,6 +2048,7 @@
                   ? g.name.trim().slice(0, 48)
                   : `Glifo ${i + 1}`,
               key,
+              group: typeof g.group === "string" ? g.group.trim().slice(0, 48) : "",
               strokes,
             };
           });
@@ -1955,13 +2185,14 @@
             return false;
           const g = state.glyphs.find((item) => item.id === id);
           selected = g?.id || null;
-          draft = clone(g?.strokes ?? template ?? []);
+          draft = clone(g?.strokes ?? template?.strokes ?? []);
           history = [];
           active = null;
           pendingGeometry = null;
           dirty = false;
           $("glyphName").value = g?.name || "";
           $("glyphKey").value = g?.key || "";
+          $("glyphGroup").value = g?.group ?? template?.group ?? "";
           drawDraft();
           updateEditor();
           renderKeyboard();
@@ -2009,12 +2240,64 @@
           stroke.points[1] = snapToVertex(pointFor(e));
         }
 
+        function strokeDistance([x, y], points) {
+          if (points.length === 1) return Math.hypot(x - points[0][0], y - points[0][1]);
+          let nearest = Infinity;
+          for (let index = 1; index < points.length; index++) {
+            const [x1, y1] = points[index - 1];
+            const [x2, y2] = points[index];
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const length = dx * dx + dy * dy;
+            const along = length ? clamp(((x - x1) * dx + (y - y1) * dy) / length, 0, 1) : 0;
+            nearest = Math.min(nearest, Math.hypot(x - x1 - dx * along, y - y1 - dy * along));
+          }
+          return nearest;
+        }
+
+        const eraserBtn = $("eraserBtn");
+        function setEraser(enabled) {
+          eraserBtn.setAttribute("aria-pressed", String(enabled));
+        }
+        eraserBtn.addEventListener("click", () => {
+          setEraser(eraserBtn.getAttribute("aria-pressed") !== "true");
+        });
+        $("drawingTool").addEventListener("change", () => setEraser(false));
+
+        function eraseStroke(point) {
+          let target = -1;
+          let nearest = 7;
+          for (let index = draft.length - 1; index >= 0; index--) {
+            const { width, points } = draft[index];
+            const distance = strokeDistance(point, points) - width / 2;
+            if (points.length === 1 && distance <= 0) {
+              target = index;
+              break;
+            }
+            const gap = Math.max(0, distance);
+            if (gap < nearest) {
+              nearest = gap;
+              target = index;
+            }
+          }
+          if (target === -1) return;
+          remember();
+          draft.splice(target, 1);
+          dirty = true;
+          drawDraft();
+          updateEditor();
+        }
+
         $("drawingSvg").addEventListener("pointerdown", (e) => {
           if (active !== null || e.button !== 0) return;
           e.preventDefault();
+          const tool = $("drawingTool").value;
+          if (eraserBtn.getAttribute("aria-pressed") === "true") {
+            eraseStroke(pointFor(e));
+            return;
+          }
           $("drawingSvg").setPointerCapture(e.pointerId);
           active = e.pointerId;
-          const tool = $("drawingTool").value;
           if (tool !== "freehand") {
             const point = snapToVertex(pointFor(e));
             pendingGeometry = {
@@ -2087,7 +2370,7 @@
           $("gridBtn").textContent = hasGrid ? "Cuadrícula ✓" : "Cuadrícula";
           $("gridBtn").setAttribute("aria-pressed", String(hasGrid));
         });
-        for (const id of ["glyphName", "glyphKey"])
+        for (const id of ["glyphName", "glyphKey", "glyphGroup"])
           $(id).addEventListener("input", () => (dirty = true));
         $("undoBtn").addEventListener("click", () => {
           if (!history.length) return;
@@ -2107,7 +2390,7 @@
         $("newBtn").addEventListener("click", () => loadEditor());
         $("useGlyphTemplate").addEventListener("click", () => {
           const glyph = state.glyphs.find((item) => item.id === selected);
-          if (glyph && loadEditor(null, false, glyph.strokes))
+          if (glyph && loadEditor(null, false, glyph))
             $("glyphName").focus();
         });
         $("saveGlyphBtn").addEventListener("click", () => {
@@ -2131,6 +2414,7 @@
             id: selected || newId(),
             name,
             key,
+            group: $("glyphGroup").value.trim(),
             strokes: clone(draft),
           };
           const idx = state.glyphs.findIndex((g) => g.id === selected);
@@ -2139,7 +2423,7 @@
           saveState();
           const wasEditing = Boolean(selected);
           const keepTemplate = $("keepGlyphTemplate").checked;
-          loadEditor(null, true, keepTemplate ? glyph.strokes : null);
+          loadEditor(null, true, keepTemplate ? glyph : null);
           if (keepTemplate) $("glyphName").focus();
           renderMessage();
           toast(
@@ -2192,6 +2476,7 @@
         let shortcuts = new Map();
         function renderKeyboard() {
           shortcuts = keyboardShortcuts(state.glyphs);
+          const group = renderKeyboardGroupFilter();
           const keyboard = $("keyboard");
           keyboard.replaceChildren();
           $("glyphCount").textContent =
@@ -2206,6 +2491,7 @@
             return;
           }
           for (const glyph of state.glyphs) {
+            if (group !== null && normalizeKey(glyph.group) !== group) continue;
             const cell = document.createElement("div");
             cell.className = "key-cell";
             const key = document.createElement("button");
@@ -2225,29 +2511,373 @@
           }
         }
 
+        const selectedGalleryGroups = new Map();
+        const gallerySelection = new Set();
+        let galleryLanguage = activeLanguage;
+
+        function showGlyphView(editing) {
+          $("editorGallery").hidden = editing;
+          $("glyphEditing").hidden = !editing;
+          $("editorMode").hidden = !editing;
+          $("showGlyphGallery").setAttribute("aria-pressed", String(!editing));
+          $("showGlyphEditing").setAttribute("aria-pressed", String(editing));
+        }
+
+        $("showGlyphGallery").addEventListener("click", () => showGlyphView(false));
+        $("showGlyphEditing").addEventListener("click", () => showGlyphView(true));
+        $("newGalleryGlyph").addEventListener("click", () => {
+          if (!loadEditor()) return;
+          showGlyphView(true);
+          $("glyphName").focus();
+        });
+
+        function updateGallerySelection() {
+          const comparison = $("glyphComparison");
+          comparison.replaceChildren();
+          comparison.hidden = true;
+          $("compareGlyphs").textContent = "Comparar dos glifos";
+          $("compareGlyphs").disabled = gallerySelection.size !== 2;
+          $("applyGlyphGroup").disabled = gallerySelection.size === 0;
+          $("glyphGalleryStatus").textContent = gallerySelection.size
+            ? gallerySelection.size + (gallerySelection.size === 1 ? " glifo seleccionado" : " glifos seleccionados")
+            : "";
+        }
+
+        $("glyphSearch").addEventListener("input", renderEditorGlyphs);
+        $("applyGlyphGroup").addEventListener("click", () => {
+          if (!gallerySelection.size) return;
+          const group = $("bulkGlyphGroup").value.trim();
+          for (const glyph of state.glyphs) {
+            if (!gallerySelection.has(glyph.id)) continue;
+            glyph.group = group;
+            if (glyph.id === selected) $("glyphGroup").value = group;
+          }
+          gallerySelection.clear();
+          $("bulkGlyphGroup").value = "";
+          selectedGalleryGroups.set(activeLanguage, normalizeKey(group));
+          saveState();
+          renderEditorGlyphs();
+          toast("Grupos actualizados.");
+        });
+        $("compareGlyphs").addEventListener("click", () => {
+          const comparison = $("glyphComparison");
+          if (!comparison.hidden) {
+            updateGallerySelection();
+            return;
+          }
+          if (gallerySelection.size !== 2) return;
+          for (const glyph of state.glyphs.filter(item => gallerySelection.has(item.id))) {
+            const figure = document.createElement("figure");
+            const caption = document.createElement("figcaption");
+            caption.textContent = glyph.name;
+            figure.append(glyphSvg(glyph, "key-art"), caption);
+            comparison.append(figure);
+          }
+          comparison.hidden = false;
+          $("compareGlyphs").textContent = "Cerrar comparación";
+          comparison.scrollIntoView({ block: "nearest" });
+        });
+
         function renderEditorGlyphs() {
           const gallery = $("editorGlyphs");
-          gallery.replaceChildren();
-          $("editorGallery").hidden = state.glyphs.length === 0;
+          const sidebar = $("editorGroupList");
+          sidebar.replaceChildren();
+          if (galleryLanguage !== activeLanguage) {
+            galleryLanguage = activeLanguage;
+            gallerySelection.clear();
+            $("glyphSearch").value = "";
+            $("bulkGlyphGroup").value = "";
+          }
+          const available = new Set(state.glyphs.map(glyph => glyph.id));
+          for (const id of gallerySelection) if (!available.has(id)) gallerySelection.delete(id);
+          updateGallerySelection();
+          const search = normalizeKey($("glyphSearch").value);
+          const groups = new Map();
+          const ungrouped = [];
           for (const glyph of state.glyphs) {
+            const group = glyph.group || "";
+            if (!group) {
+              ungrouped.push(glyph);
+              continue;
+            }
+            const key = normalizeKey(group);
+            if (!groups.has(key)) groups.set(key, { name: group, glyphs: [] });
+            groups.get(key).glyphs.push(glyph);
+          }
+          $("glyphGroupNames").replaceChildren(...[...groups.values()].map(({ name }) => new Option(name, name)));
+          if (ungrouped.length) groups.set("", { name: "Sin grupo", glyphs: ungrouped });
+
+          const results = new Map();
+          const buttons = new Map();
+          function showGroup(key) {
+            for (const [groupKey, button] of buttons) {
+              button.setAttribute("aria-pressed", String(key === groupKey));
+            }
+            const visible = results.get(key) ?? [];
+            gallery.replaceChildren(...visible.map(editorGlyphCard));
+            if (!visible.length) {
+              gallery.textContent = state.glyphs.length ? "No hay glifos que coincidan con la búsqueda." : "Todavía no hay glifos en este lenguaje.";
+            }
+          }
+          const orderedGroups = [...groups].sort(([, a], [, b]) =>
+            a.name.localeCompare(b.name, "es", { sensitivity: "base" }),
+          );
+          for (const [key, { name, glyphs }] of orderedGroups) {
+            const visible = search
+              ? glyphs.filter(glyph => [glyph.name, glyph.key, name].some(value => normalizeKey(value).includes(search)))
+              : glyphs;
+            results.set(key, visible);
             const button = document.createElement("button");
             button.type = "button";
-            button.className = "editor-glyph";
-            button.title = "Editar " + glyph.name;
-            button.setAttribute("aria-label", button.title);
-            button.setAttribute("aria-pressed", String(glyph.id === selected));
-            const label = document.createElement("span");
-            label.textContent = glyphEquivalent(glyph);
-            button.append(glyphSvg(glyph, "key-art"), label);
+            button.className = "editor-group";
+            button.textContent = name;
+            const count = document.createElement("span");
+            count.className = "editor-group-count";
+            count.textContent = search ? visible.length + " de " + glyphs.length : String(glyphs.length);
+            button.append(count);
             button.addEventListener("click", () => {
-              if (loadEditor(glyph.id)) $("glyphName").focus();
+              selectedGalleryGroups.set(activeLanguage, key);
+              showGroup(key);
+              gallery.parentElement.scrollTop = 0;
             });
-            gallery.append(button);
+            buttons.set(key, button);
+            sidebar.append(button);
           }
+          const preferred = selectedGalleryGroups.get(activeLanguage);
+          const firstMatch = [...results].find(([, glyphs]) => glyphs.length)?.[0];
+          showGroup(results.get(preferred)?.length ? preferred : firstMatch ?? orderedGroups[0]?.[0]);
+        }
+
+        function editorGlyphCard(glyph) {
+          const card = document.createElement("div");
+          card.className = "gallery-card";
+          const label = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = gallerySelection.has(glyph.id);
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) gallerySelection.add(glyph.id);
+            else gallerySelection.delete(glyph.id);
+            updateGallerySelection();
+          });
+          const identifyingText = glyph.key && glyph.name !== glyph.key.toUpperCase()
+            ? glyph.name + " · " + glyph.key.toUpperCase() : glyph.name;
+          label.append(checkbox, " " + identifyingText, glyphSvg(glyph, "key-art"));
+          const actions = document.createElement("div");
+          actions.className = "gallery-card-actions";
+          const edit = document.createElement("button");
+          edit.type = "button";
+          edit.textContent = "Editar";
+          edit.setAttribute("aria-label", "Editar " + glyph.name);
+          edit.addEventListener("click", () => {
+            if (!loadEditor(glyph.id)) return;
+            showGlyphView(true);
+            $("glyphName").focus();
+          });
+          const template = document.createElement("button");
+          template.type = "button";
+          template.textContent = "Usar como plantilla";
+          template.setAttribute("aria-label", "Usar " + glyph.name + " como plantilla");
+          template.addEventListener("click", () => {
+            if (!loadEditor(null, false, glyph)) return;
+            showGlyphView(true);
+            $("glyphName").focus();
+          });
+          actions.append(edit, template);
+          card.append(label, actions);
+          return card;
         }
         function glyphEquivalent(glyph) {
           return glyph?.key?.toUpperCase() || glyph?.name || "?";
         }
+
+        function analyzeDecoding(message) {
+          const segments = [];
+          const groups = new Map();
+          const frequency = new Map();
+          const lengths = new Set();
+          let ids = [];
+
+          function finishWord() {
+            if (!ids.length) return;
+            const key = JSON.stringify(ids);
+            let group = groups.get(key);
+            if (!group) {
+              const seen = new Set();
+              const repeated = new Set();
+              for (const id of ids) {
+                if (seen.has(id)) repeated.add(id);
+                seen.add(id);
+              }
+              group = { key, ids, repeated, count: 0 };
+              groups.set(key, group);
+              lengths.add(ids.length);
+            }
+            group.count++;
+            segments.push({ type: "word", group });
+            ids = [];
+          }
+
+          for (const token of message) {
+            if (token.type === "glyph") {
+              ids.push(token.id);
+              frequency.set(token.id, (frequency.get(token.id) ?? 0) + 1);
+            } else {
+              finishWord();
+              segments.push(token);
+            }
+          }
+          finishWord();
+          const seenInWord = new Set();
+          const sharedLetters = new Set();
+          for (const group of groups.values()) {
+            for (const id of new Set(group.ids)) {
+              if (seenInWord.has(id)) sharedLetters.add(id);
+              seenInWord.add(id);
+            }
+          }
+          return { segments, groups: [...groups.values()], frequency, sharedLetters, lengths: [...lengths].sort((a, b) => a - b) };
+        }
+
+        const decodeMode = $("decodeMode");
+        const decodeLength = $("decodeLength");
+        let decoding;
+        let decodeSelection = null;
+
+        function renderDecoding() {
+          const message = $("decodeMessage");
+          const analysis = analyzeDecoding(state.message);
+          const glyphs = new Map(state.glyphs.map(glyph => [glyph.id, glyph]));
+          decoding = { ...analysis, glyphs, words: [], results: [] };
+          decodeSelection = null;
+          message.replaceChildren();
+          let line = document.createElement("div");
+          line.className = "decode-line";
+          if (analysis.segments.length) message.append(line);
+          else message.textContent = "Escribí un mensaje para analizarlo.";
+
+          for (const segment of analysis.segments) {
+            if (segment.type === "newline") {
+              line = document.createElement("div");
+              line.className = "decode-line";
+              message.append(line);
+            } else if (segment.type === "word") {
+              const { group } = segment;
+              const button = document.createElement("button");
+              button.type = "button";
+              button.className = "decode-word";
+              button.setAttribute("aria-label", "Resaltar palabra: " + group.ids.map(id => glyphEquivalent(glyphs.get(id))).join(" "));
+              const letters = group.ids.map(id => {
+                const element = document.createElement("span");
+                element.className = "decode-letter";
+                element.append(glyphSvg(glyphs.get(id), ""));
+                button.append(element);
+                return { id, element };
+              });
+              button.addEventListener("click", () => {
+                decodeMode.value = "same";
+                decodeSelection = group.key;
+                renderDecodingResults();
+              });
+              decoding.words.push({ group, button, letters });
+              line.append(button);
+            } else {
+              const span = document.createElement("span");
+              span.className = segment.type === "punctuation" ? "decode-punctuation" : "decode-space";
+              span.textContent = segment.type === "punctuation" ? segment.text : " ";
+              line.append(span);
+            }
+          }
+
+          const previousLength = decodeLength.value;
+          decodeLength.replaceChildren();
+          for (const length of analysis.lengths) decodeLength.add(new Option(String(length), String(length)));
+          if (analysis.lengths.includes(Number(previousLength))) decodeLength.value = previousLength;
+          decodeLength.disabled = !analysis.lengths.length;
+          renderDecodingResults();
+        }
+
+        function renderDecodingResults() {
+          const mode = decodeMode.value;
+          const list = $("decodeResults");
+          list.replaceChildren();
+          decoding.results = [];
+          $("decodeLengthField").classList.toggle("hidden", mode !== "length");
+          const rows = mode === "frequency" || mode === "shared"
+            ? [...decoding.frequency]
+                .filter(([id]) => mode === "frequency" || decoding.sharedLetters.has(id))
+                .map(([id, count]) => ({ key: id, ids: [id], count }))
+            : decoding.groups.filter(group => {
+                if (mode === "repeated") return group.count > 1;
+                if (mode === "unique") return group.count === 1;
+                return mode === "same";
+              });
+          rows.sort((a, b) => b.count - a.count);
+          for (const { key, ids, count } of rows) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "decode-result";
+            const labels = ids.map(id => glyphEquivalent(decoding.glyphs.get(id)));
+            const countLabel = count === 1 ? "1 aparición" : count + " apariciones";
+            button.setAttribute("aria-label", labels.join(" ") + ", " + countLabel);
+            const preview = document.createElement("span");
+            preview.className = "decode-result-glyphs";
+            for (const id of ids) preview.append(glyphSvg(decoding.glyphs.get(id), ""));
+            const tally = document.createElement("span");
+            tally.textContent = String(count);
+            button.append(preview, tally);
+            button.addEventListener("click", () => {
+              decodeSelection = decodeSelection === key ? null : key;
+              const firstMatch = applyDecodingHighlight();
+              firstMatch?.scrollIntoView({ block: "nearest" });
+            });
+            decoding.results.push({ key, button });
+            list.append(button);
+          }
+          applyDecodingHighlight();
+        }
+
+        function applyDecodingHighlight() {
+          const mode = decodeMode.value;
+          const countsLetters = mode === "frequency" || mode === "shared";
+          let count = 0;
+          let firstMatch;
+          for (const { group, button, letters } of decoding.words) {
+            const matches = mode === "repeated" ? group.count > 1
+              : mode === "unique" ? group.count === 1
+              : mode === "same" ? decodeSelection === group.key
+              : mode === "length" ? group.ids.length === Number(decodeLength.value)
+              : mode === "letters" && group.repeated.size > 0;
+            const wordMatch = matches && (!decodeSelection || decodeSelection === group.key);
+            button.classList.toggle("is-match", wordMatch);
+            let letterMatch = false;
+            for (const { id, element } of letters) {
+              const marked = (mode === "letters" && group.repeated.has(id)) ||
+                (mode === "shared" && decoding.sharedLetters.has(id) && (!decodeSelection || id === decodeSelection)) ||
+                (mode === "frequency" && id === decodeSelection);
+              element.classList.toggle("is-match", marked);
+              if (marked && countsLetters) count++;
+              letterMatch ||= marked;
+            }
+            if (wordMatch) count++;
+            if (!firstMatch && (wordMatch || letterMatch)) firstMatch = button;
+          }
+          for (const { key, button } of decoding.results) {
+            button.setAttribute("aria-pressed", String(key === decodeSelection));
+          }
+          $("decodeStatus").textContent = !decoding.words.length ? "No hay palabras para analizar."
+            : mode === "frequency" && !decodeSelection ? "Elegí un glifo para localizar sus apariciones."
+            : mode === "same" && !decodeSelection ? "Elegí una palabra en el mensaje o en la lista."
+            : countsLetters ? (count === 1 ? "1 aparición resaltada" : count + " apariciones resaltadas")
+            : (count === 1 ? "1 palabra resaltada" : count + " palabras resaltadas");
+          return firstMatch;
+        }
+
+        decodeMode.addEventListener("change", () => {
+          decodeSelection = null;
+          renderDecodingResults();
+        });
+        decodeLength.addEventListener("change", applyDecodingHighlight);
         function referenceString() {
           const map = new Map(state.glyphs.map((g) => [g.id, g]));
           return state.message
@@ -2661,6 +3291,7 @@
           $("referenceText").textContent = referenceString() || "—";
           for (const id of ["clearMessageBtn", "pngBtn", "copyRefBtn", "exportMessageBtn"])
             $(id).disabled = state.message.length === 0;
+          if (!$("decodePanel").hidden) renderDecoding();
           return activeInput;
         }
         function refreshMessageAfterEdit(completedWordEnd = null) {
@@ -3003,6 +3634,7 @@
           restoreSourceImage();
           if (creating) {
             showView($("editorTab"));
+            showGlyphView(true);
             $("glyphName").focus();
           }
         }
@@ -3032,9 +3664,63 @@
         });
 
         const toggleKeyboardBtn = $("toggleKeyboardBtn");
+        const writingModeBtn = $("writingModeBtn");
+        const keyboardFilter = $("keyboardFilter");
+        const keyboardGroupsByLanguage = new Map();
+        let writingMode = false;
+
+        function renderKeyboardGroupFilter() {
+          keyboardFilter.hidden = !writingMode || $("virtualKeyboard").hidden;
+          if (!writingMode) return null;
+          const groups = new Map();
+          for (const glyph of state.glyphs) {
+            const key = normalizeKey(glyph.group);
+            if (!groups.has(key)) groups.set(key, { name: glyph.group || "Sin grupo", preview: [] });
+            const { preview } = groups.get(key);
+            if (preview.length < 3) preview.push(glyph);
+          }
+          if (groups.size === 1) groups.delete("");
+          const saved = keyboardGroupsByLanguage.get(activeLanguage);
+          const selectedGroup = groups.has(saved) ? saved : null;
+          const scrollLeft = keyboardFilter.scrollLeft;
+          keyboardFilter.replaceChildren();
+
+          function addTag(key, name, preview) {
+            const tag = document.createElement("button");
+            tag.type = "button";
+            tag.className = "keyboard-group-tag";
+            tag.setAttribute("aria-pressed", String(key === selectedGroup));
+            const label = document.createElement("span");
+            label.textContent = name;
+            tag.append(label, ...preview.map(glyph => glyphSvg(glyph, "key-art")));
+            tag.addEventListener("click", event => {
+              keyboardGroupsByLanguage.set(activeLanguage, key);
+              renderKeyboard();
+              const focusTarget = event.detail === 0
+                ? keyboardFilter.querySelector('[aria-pressed="true"]')
+                : $("paper");
+              focusTarget?.focus({ preventScroll: true });
+              placeMessageCaret(true);
+            });
+            keyboardFilter.append(tag);
+          }
+          addTag(null, "Todos", []);
+          for (const [key, { name, preview }] of groups) addTag(key, name, preview);
+          keyboardFilter.scrollLeft = scrollLeft;
+          return selectedGroup;
+        }
+
+        writingModeBtn.addEventListener("click", () => {
+          writingMode = !writingMode;
+          writingModeBtn.setAttribute("aria-pressed", String(writingMode));
+          renderKeyboard();
+          $("paper").focus({ preventScroll: true });
+          placeMessageCaret(true);
+        });
         toggleKeyboardBtn.addEventListener("click", () => {
           const keyboard = $("virtualKeyboard");
           keyboard.hidden = !keyboard.hidden;
+          keyboardFilter.hidden = !writingMode || keyboard.hidden;
           toggleKeyboardBtn.setAttribute(
             "aria-expanded",
             String(!keyboard.hidden),
@@ -3072,33 +3758,34 @@
           $("paper").focus({ preventScroll: true });
         });
 
-        const zoomInput = $("messageZoom");
-        const zoomStorageKey = KEY + "-message-zoom";
-        function applyMessageZoom() {
-          const percent = zoomInput.valueAsNumber;
-          $("message").style.zoom = String(percent / 100);
-          $("messageZoomValue").textContent = percent + "%";
-        }
-        try {
-          const savedZoom = Number(localStorage.getItem(zoomStorageKey));
-          if (
-            savedZoom >= Number(zoomInput.min) &&
-            savedZoom <= Number(zoomInput.max)
-          ) {
-            zoomInput.valueAsNumber = savedZoom;
+        function setupZoom(inputId, contentId, storageSuffix) {
+          const input = $(inputId);
+          const storageKey = KEY + storageSuffix;
+          function applyZoom() {
+            const percent = input.valueAsNumber;
+            $(contentId).style.zoom = String(percent / 100);
+            $(inputId + "Value").textContent = percent + "%";
           }
-        } catch {
-          /* El zoom sigue disponible durante la sesión. */
-        }
-        applyMessageZoom();
-        zoomInput.addEventListener("input", () => {
-          applyMessageZoom();
           try {
-            localStorage.setItem(zoomStorageKey, zoomInput.value);
+            const savedZoom = Number(localStorage.getItem(storageKey));
+            if (savedZoom >= Number(input.min) && savedZoom <= Number(input.max)) {
+              input.valueAsNumber = savedZoom;
+            }
           } catch {
             /* El zoom sigue disponible durante la sesión. */
           }
-        });
+          applyZoom();
+          input.addEventListener("input", () => {
+            applyZoom();
+            try {
+              localStorage.setItem(storageKey, input.value);
+            } catch {
+              /* El zoom sigue disponible durante la sesión. */
+            }
+          });
+        }
+        setupZoom("messageZoom", "message", "-message-zoom");
+        setupZoom("decodeZoom", "decodeMessage", "-decode-zoom");
         $("punctuationPicker").addEventListener("change", (event) => {
           const picker = event.currentTarget;
           if (!isPunctuation(picker.value)) return;
@@ -3206,9 +3893,10 @@
             (e.target === expandComposerBtn ||
               e.target === invertMessageBtn ||
               e.target === toggleKeyboardBtn ||
+              e.target === writingModeBtn ||
               e.target === sourceImageBtn ||
               e.target.closest?.(
-                ".action-menu summary, .action-menu button, .source-image-tools button, .word-completion",
+                ".action-menu summary, .action-menu button, .source-image-tools button, .word-completion, .keyboard-group-tag",
               ))
           )
             return;
