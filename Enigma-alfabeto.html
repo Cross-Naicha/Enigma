@@ -1,0 +1,3342 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#10151e" />
+    <title>Enigma — Taller de alfabetos</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10151e;
+        --panel: #171e29;
+        --panel2: #202a38;
+        --line: #303d4f;
+        --ink: #edf3fb;
+        --muted: #9baec3;
+        --accent: #75e4cd;
+        --accent2: #153f3a;
+        --paper: #f7f8f4;
+        --paper-ink: #26323d;
+        --danger: #ffb4ac;
+        --radius: 18px;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(ellipse at 12% -10%, #203844 0, transparent 46%),
+          var(--bg);
+        color: var(--ink);
+        min-height: 100vh;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      button {
+        color: var(--ink);
+        border: 1px solid var(--line);
+        background: var(--panel2);
+        border-radius: 10px;
+        padding: 10px 13px;
+        font-weight: 650;
+        font-size: 0.86rem;
+        letter-spacing: 0.005em;
+        transition:
+          background 0.15s,
+          border-color 0.15s,
+          transform 0.15s;
+      }
+      button:not(:disabled):hover {
+        border-color: #628192;
+        background: #2a3a49;
+      }
+      button:not(:disabled):active {
+        transform: translateY(1px);
+      }
+      button.primary {
+        color: #0a2723;
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      button.primary:not(:disabled):hover {
+        background: #a1f5e5;
+        border-color: #a1f5e5;
+      }
+      button.danger {
+        color: var(--danger);
+      }
+      button.ghost {
+        background: transparent;
+      }
+      input {
+        width: 100%;
+        background: #121a24;
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        min-height: 43px;
+        padding: 10px 12px;
+      }
+      input::placeholder {
+        color: #718298;
+      }
+      label {
+        font-size: 0.83rem;
+        color: var(--muted);
+        font-weight: 650;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(1.75rem, 4vw, 2.7rem);
+        font-weight: 720;
+        letter-spacing: -0.05em;
+      }
+      h2 {
+        font-size: 1.1rem;
+        letter-spacing: -0.02em;
+      }
+      h3 {
+        font-size: 0.96rem;
+      }
+      p {
+        line-height: 1.5;
+      }
+      svg {
+        display: block;
+      }
+      .shell {
+        padding: 28px 26px 48px;
+        margin: auto;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .emblem {
+        width: 56px;
+        height: 56px;
+        flex: none;
+        border: 1px solid #4f9f95;
+        border-radius: 15px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(145deg, #294d4c, #132629);
+        box-shadow: inset 0 0 22px #75e4cd0c;
+      }
+      .emblem svg {
+        width: 39px;
+        height: 39px;
+        color: var(--accent);
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: var(--accent);
+        margin-bottom: 4px;
+      }
+      .subtitle {
+        color: var(--muted);
+        font-size: 0.91rem;
+        margin-top: 4px;
+      }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .storage {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--muted);
+        font-size: 0.76rem;
+        margin-right: 5px;
+      }
+      .dot {
+        height: 8px;
+        width: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 8px #75e4cd48;
+      }
+      .storage.warn .dot {
+        background: #ffcd78;
+      }
+      .view-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .view-tabs [aria-selected="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #0a2723;
+      }
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: linear-gradient(145deg, #1b2531, var(--panel));
+        box-shadow: 0 16px 36px #0002;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .panel-header {
+        padding: 20px 21px 17px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+      }
+      .panel-header p {
+        color: var(--muted);
+        font-size: 0.83rem;
+        margin-top: 5px;
+      }
+      .section-tag {
+        white-space: nowrap;
+        border: 1px solid #3a7168;
+        color: var(--accent);
+        background: #203e3b;
+        border-radius: 99px;
+        font-size: 0.72rem;
+        font-weight: 750;
+        padding: 5px 9px;
+      }
+      .panel-body {
+        padding: 20px;
+      }
+      .editor-info {
+        display: grid;
+        grid-template-columns: 1fr 108px;
+        gap: 12px;
+        margin-bottom: 15px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-width: 0;
+      }
+      .board-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+      }
+      .drawing-board {
+        position: relative;
+        width: min(100%, 390px);
+        margin: 0 auto;
+        aspect-ratio: 1;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--paper);
+        border: 1px solid #cad2cb;
+        color: var(--paper-ink);
+        touch-action: none;
+        user-select: none;
+        box-shadow: 0 4px 20px #0002;
+      }
+      .drawing-board svg {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        z-index: 2;
+        touch-action: none;
+        cursor:
+          url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2225%22%20height%3D%2225%22%20viewBox%3D%220%200%2025%2025%22%3E%3Cpath%20d%3D%22M12.5%202v21M2%2012.5h21%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E")
+            12 12,
+          crosshair;
+      }
+      .drawing-board.has-grid {
+        background-color: #f8faf7;
+        background-image:
+          linear-gradient(#dce4df 1px, transparent 1px),
+          linear-gradient(90deg, #dce4df 1px, transparent 1px);
+        background-size: 12.5% 12.5%;
+      }
+      .drawing-board.has-grid:before,
+      .drawing-board.has-grid:after {
+        content: "";
+        position: absolute;
+        z-index: 1;
+        pointer-events: none;
+        background: #a6bcb3;
+      }
+      .drawing-board.has-grid:before {
+        left: 50%;
+        height: 100%;
+        width: 1px;
+      }
+      .drawing-board.has-grid:after {
+        top: 50%;
+        width: 100%;
+        height: 1px;
+      }
+      .board-guides {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 0.76rem;
+        padding: 0 2px;
+      }
+      .tools-row {
+        margin-top: 14px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .stroke-control {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex: 1;
+        min-width: 145px;
+      }
+      .stroke-control input {
+        padding: 0;
+        min-height: 22px;
+        accent-color: var(--accent);
+        width: 100%;
+        max-width: 120px;
+      }
+      .stroke-sample {
+        flex: none;
+        background: var(--paper);
+        border-radius: 50%;
+        width: 12px;
+        height: 12px;
+      }
+      .editor-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 17px;
+        border-top: 1px solid var(--line);
+        padding-top: 15px;
+      }
+      .editor-footer .primary {
+        flex: 1;
+        min-width: 155px;
+      }
+      .editor-footer .left-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 0.78rem;
+        margin-top: 12px;
+      }
+      .composer-panel .panel-body {
+        padding: 16px 20px 20px;
+      }
+      .composer-tools {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .composer-tools .push {
+        margin-left: auto;
+      }
+      .paper {
+        color: var(--paper-ink);
+        background: var(--paper);
+        border: 1px solid #d6ddd7;
+        border-radius: 12px;
+        min-height: 244px;
+        position: relative;
+        padding: 22px 19px;
+        box-shadow: inset 0 2px 10px #26323d0b;
+        overflow: auto;
+      }
+      .message {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        align-content: flex-start;
+        gap: 4px;
+        min-height: 197px;
+      }
+      .message:empty:after {
+        content: "Los símbolos que escribas aparecerán aquí";
+        color: #718177;
+        font-size: 0.89rem;
+        text-align: center;
+        width: 100%;
+        align-self: center;
+        padding: 76px 0;
+      }
+      .message-symbol {
+        height: 64px;
+        width: 64px;
+        flex: none;
+        display: block;
+      }
+      .message-space {
+        width: 22px;
+        height: 64px;
+        flex: none;
+      }
+      .message-newline {
+        width: 100%;
+        height: 0;
+        flex: 0 0 100%;
+      }
+      .paper:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      .keyboard-grid {
+        --key-width: 104px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .key-cell {
+        flex: 1 0 min(100%, var(--key-width));
+        position: relative;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #151e29;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .key-cell:hover {
+        border-color: #5e8a87;
+        background: #20313b;
+      }
+      .glyph-key {
+        background: none;
+        border: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 6px 9px;
+        min-height: 102px;
+        border-radius: 12px;
+        min-width: 0;
+      }
+      .glyph-key:not(:disabled):hover {
+        background: transparent;
+      }
+      .key-art {
+        width: 47px;
+        height: 47px;
+        color: var(--ink);
+      }
+      .keyboard-glyphs {
+        display: contents;
+      }
+      .keyboard-controls {
+        flex: 999 0 min(100%, 224px);
+        min-width: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .keyboard-control {
+        min-width: 0;
+        min-height: 44px;
+        padding: 8px 4px;
+      }
+      .empty-state {
+        border: 1px dashed #46596c;
+        border-radius: 13px;
+        padding: 28px 16px;
+        flex: 0 0 100%;
+        text-align: center;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.84rem;
+      }
+      .empty-state .empty-icon {
+        font-size: 2rem;
+        color: #648c89;
+      }
+      .empty-state strong {
+        color: var(--ink);
+      }
+      .reference {
+        margin-top: 15px;
+        padding: 12px 14px;
+        background: #121a24;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-size: 0.83rem;
+        color: var(--muted);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .reference[hidden] {
+        display: none;
+      }
+      .reference strong {
+        color: var(--ink);
+        font-size: 0.75rem;
+        display: block;
+        margin-bottom: 7px;
+      }
+      .footnote {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin: 20px 2px 0;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .toast {
+        position: fixed;
+        z-index: 10;
+        bottom: 24px;
+        left: 50%;
+        transform: translate(-50%, 18px);
+        background: #203e3b;
+        border: 1px solid #4f9f95;
+        color: var(--ink);
+        padding: 12px 18px;
+        border-radius: 11px;
+        box-shadow: 0 8px 30px #0006;
+        font-size: 0.9rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s;
+        max-width: calc(100% - 32px);
+        text-align: center;
+      }
+      .toast.show {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+      .toast.error {
+        background: #482e31;
+        border-color: #a66c69;
+      }
+      .hidden {
+        display: none !important;
+      }
+      @media (max-width: 840px) {
+        .shell {
+          padding: 20px 16px 28px;
+        }
+        .panel-body {
+          padding: 16px;
+        }
+        .composer-panel .panel-body {
+          padding: 16px;
+        }
+        .panel-header {
+          padding: 17px 16px;
+        }
+        .header-actions {
+          justify-content: flex-start;
+        }
+        .drawing-board {
+          width: min(100%, 390px);
+        }
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+          margin-bottom: 20px;
+        }
+        .message-symbol {
+          width: 53px;
+          height: 53px;
+        }
+        .message-space {
+          height: 53px;
+        }
+        .paper {
+          min-height: 220px;
+        }
+        .message {
+          min-height: 173px;
+        }
+        .composer-tools .push {
+          margin-left: 0;
+        }
+      }
+      @media (max-width: 400px) {
+        .editor-info {
+          grid-template-columns: minmax(0, 1fr) 92px;
+        }
+        .keyboard-grid {
+          --key-width: 91px;
+        }
+        .editor-footer .left-actions {
+          width: 100%;
+        }
+        .editor-footer .left-actions button {
+          flex: 1;
+        }
+        .tools-row button {
+          padding: 8px;
+        }
+        .emblem {
+          width: 48px;
+          height: 48px;
+        }
+        .paper {
+          padding: 14px 10px;
+        }
+        .message-symbol {
+          width: 46px;
+          height: 46px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+      .message {
+        display: block;
+      }
+      .message:empty {
+        display: grid;
+        place-items: center;
+      }
+      .message-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        align-content: flex-start;
+        gap: 4px;
+        min-height: 68px;
+      }
+      .message-line + .message-line {
+        margin-top: 4px;
+      }
+      @media (max-width: 840px) {
+        .message-line {
+          min-height: 57px;
+        }
+      }
+      @media (max-width: 400px) {
+        .message-line {
+          min-height: 50px;
+        }
+        .message-space {
+          height: 46px;
+        }
+      }
+      .message-line {
+        align-items: flex-start;
+      }
+      .message-word {
+        display: grid;
+        justify-items: start;
+        min-width: 0;
+        max-width: 100%;
+        gap: 4px;
+      }
+      .message-word-glyphs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--paper-ink);
+        max-width: 100%;
+        text-align: left;
+      }
+      .message-word-glyphs:not(:disabled):hover,
+      .message-word-glyphs[aria-expanded="true"] {
+        background: #e1eae3;
+      }
+      .message-letter {
+        display: grid;
+        grid-template-columns: min-content;
+        align-content: start;
+      }
+      .message-equivalence {
+        contain: inline-size;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+        font-size: 0.78rem;
+        line-height: 1.25;
+        color: #355b52;
+      }
+      .message-annotation {
+        width: 100%;
+        font-weight: 700;
+        color: #264f44;
+        text-align: center;
+        overflow-wrap: anywhere;
+      }
+      .word-suggestions,
+      .word-annotation-form {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
+        max-width: 100%;
+      }
+      .word-suggestions button,
+      .word-annotation-form button {
+        padding: 4px 8px;
+        font-size: 0.78rem;
+      }
+      .word-annotation-form input {
+        width: min(155px, 100%);
+        min-height: 32px;
+        padding: 5px 8px;
+      }
+      .shell:has(#composerPanel:not([hidden])) {
+        height: 100vh;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        padding-block: 12px;
+      }
+      .shell:has(#composerPanel:not([hidden])) header {
+        margin-bottom: 10px;
+        gap: 8px;
+      }
+      .shell:has(#composerPanel:not([hidden])) .view-tabs {
+        margin-bottom: 8px;
+      }
+      .shell:has(#composerPanel:not([hidden])) .workspace {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+      .shell:has(#composerPanel:not([hidden])) .footnote {
+        display: none;
+      }
+      .composer-panel:not([hidden]) {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-height: 0;
+      }
+      .composer-panel .panel-header {
+        flex: none;
+        padding-block: 8px;
+      }
+      .composer-panel .panel-header p,
+      .composer-panel .panel-body > .hint {
+        display: none;
+      }
+      .composer-panel .panel-body {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+        flex-direction: column;
+        gap: 8px;
+        padding-block: 10px;
+      }
+      .composer-tools {
+        flex: none;
+        margin-bottom: 0;
+        align-items: center;
+      }
+      .message-zoom {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .message-zoom input {
+        width: clamp(70px, 12vw, 120px);
+        min-height: 28px;
+        padding: 0;
+        accent-color: var(--accent);
+      }
+      .message-zoom output {
+        min-width: 4ch;
+        text-align: right;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      .paper {
+        flex: 1 1 0;
+        min-height: 0;
+        padding-block: 10px;
+        scrollbar-width: none;
+        overscroll-behavior: contain;
+      }
+      .paper::-webkit-scrollbar {
+        display: none;
+      }
+      .message {
+        min-height: 0;
+      }
+      .message:empty:after {
+        padding: 10px 0;
+      }
+      .composer-panel .reference {
+        flex: 0 1 auto;
+        max-height: 18%;
+        min-height: 0;
+        overflow: auto;
+        margin-top: 0;
+      }
+      .keyboard-grid {
+        flex: 0 1 auto;
+        min-height: 44px;
+        max-height: 54%;
+        overflow: auto;
+        overscroll-behavior: contain;
+        align-content: flex-start;
+        padding: 2px;
+        --key-width: 88px;
+      }
+      .keyboard-grid .glyph-key {
+        min-height: 84px;
+        justify-content: center;
+        padding-block: 5px;
+      }
+      .keyboard-grid .key-art {
+        width: 74px;
+        height: 74px;
+        max-width: 100%;
+      }
+      .key-name {
+        position: absolute;
+        left: 6px;
+        bottom: 4px;
+        max-width: calc(100% - 12px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.72rem;
+        opacity: 0.48;
+        pointer-events: none;
+      }
+      .editor-gallery {
+        margin-bottom: 18px;
+      }
+      .editor-gallery h3 {
+        margin-bottom: 8px;
+      }
+      .editor-glyphs {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+        gap: 6px;
+        max-height: 180px;
+        overflow: auto;
+        padding: 2px;
+      }
+      .editor-glyph {
+        display: grid;
+        justify-items: center;
+        align-content: center;
+        gap: 4px;
+        min-width: 0;
+        padding: 5px;
+      }
+      .editor-glyph span {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.75rem;
+      }
+      .editor-glyph[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: #203a3a;
+      }
+      @media (max-width: 600px) {
+        .shell:has(#composerPanel:not([hidden])) header .subtitle {
+          display: none;
+        }
+        .composer-panel .panel-body {
+          gap: 6px;
+          padding-inline: 10px;
+        }
+        .composer-tools button {
+          padding: 6px 8px;
+        }
+
+        .keyboard-grid {
+          --key-width: 76px;
+        }
+      }
+      @media (max-height: 560px) {
+        .shell:has(#composerPanel:not([hidden])) header .subtitle {
+          display: none;
+        }
+        .shell:has(#composerPanel:not([hidden])) header .emblem {
+          width: 34px;
+          height: 34px;
+        }
+        .shell:has(#composerPanel:not([hidden])) header .emblem svg {
+          width: 28px;
+          height: 28px;
+        }
+      }
+      .message {
+        position: relative;
+        --caret-height: calc(64px + 0.975rem);
+      }
+      .message-line,
+      .message-letter,
+      .message-space,
+      .message-punctuation {
+        position: relative;
+      }
+      .message-space {
+        height: var(--caret-height);
+      }
+      .message-caret {
+        display: flex;
+        align-items: flex-end;
+        position: absolute;
+        left: 100%;
+        bottom: 0;
+        z-index: 1;
+        height: var(--caret-height);
+        pointer-events: none;
+      }
+      .message-line > .message-caret {
+        top: 0;
+        bottom: auto;
+        left: 0;
+      }
+      .message-caret::after,
+      .message:empty::before {
+        content: "";
+        width: 16px;
+        height: 3px;
+        border-radius: 2px;
+        background: #26323d;
+        animation: message-caret-blink 1s step-end infinite;
+      }
+      .message:empty::before {
+        position: absolute;
+        left: 0;
+        top: var(--caret-height);
+      }
+      .paper:has(.word-annotation-form input:focus) .message-caret {
+        visibility: hidden;
+      }
+      @keyframes message-caret-blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      @media (max-width: 840px) {
+        .message {
+          --caret-height: calc(53px + 0.975rem);
+        }
+      }
+      @media (max-width: 400px) {
+        .message {
+          --caret-height: calc(46px + 0.975rem);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .message-caret::after,
+        .message:empty::before {
+          animation: none;
+        }
+      }
+      .punctuation-picker {
+        color: var(--ink);
+        background: var(--panel2);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 6px;
+      }
+      .message-punctuation {
+        display: flex;
+        flex: none;
+        align-items: flex-end;
+        height: var(--caret-height);
+        font-size: 1.8rem;
+        font-weight: 650;
+        line-height: 1;
+      }
+      .shell.composer-expanded {
+        padding: 6px;
+      }
+      .composer-expanded > header,
+      .composer-expanded > .view-tabs,
+      .composer-expanded .composer-panel > .panel-header,
+      .composer-expanded
+        .composer-tools
+        > :not(
+          .message-zoom,
+          #expandComposerBtn,
+          #invertMessageBtn,
+          #toggleKeyboardBtn
+        ),
+      .composer-expanded .composer-panel .reference {
+        display: none;
+      }
+      .composer-expanded .composer-panel .panel-body {
+        padding: 6px;
+        gap: 6px;
+      }
+      .composer-expanded #toggleKeyboardBtn {
+        margin-left: auto;
+      }
+      .composer-expanded #toggleKeyboardBtn,
+      .composer-expanded #invertMessageBtn,
+      .composer-expanded #expandComposerBtn {
+        padding: 4px 8px;
+        font-size: 0.78rem;
+      }
+      .message.message-inverted {
+        --caret-height: calc(26px + 2rem);
+      }
+      .message-inverted .message-line {
+        min-height: var(--caret-height);
+      }
+      .message-inverted .message-letter {
+        grid-template-columns: minmax(1.6rem, max-content);
+        justify-items: center;
+      }
+      .message-inverted .message-letter .message-symbol {
+        order: -1;
+        width: 26px;
+        height: 26px;
+      }
+      .message-inverted .message-equivalence {
+        contain: none;
+        max-width: 6ch;
+        font-size: 1.75rem;
+        line-height: 2rem;
+        font-weight: 750;
+        color: var(--paper-ink);
+      }
+      #invertMessageBtn[aria-pressed="true"] {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .composer-canvas {
+        display: flex;
+        flex: 1 1 0;
+        min-height: 0;
+        gap: 8px;
+      }
+      .composer-canvas .paper {
+        min-width: 0;
+      }
+      .source-image-panel:not([hidden]) {
+        display: flex;
+        flex: 0 0 44%;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        gap: 5px;
+      }
+      .source-image-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .source-image-tools button {
+        padding: 4px 7px;
+        font-size: 0.75rem;
+      }
+      .source-image-tools [aria-pressed="true"] {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .source-image-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        overscroll-behavior: contain;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #121a24;
+      }
+      .source-image-stage {
+        position: relative;
+        user-select: none;
+      }
+      .source-image-stage.is-marking {
+        cursor: crosshair;
+        touch-action: none;
+      }
+      .source-image-stage img {
+        display: block;
+        width: 100%;
+        height: auto;
+        pointer-events: none;
+      }
+      .source-mark {
+        position: absolute;
+        pointer-events: none;
+        border: 2px solid #bd7900;
+        background: #ffe14255;
+        border-radius: 3px;
+      }
+      .source-mark:last-child {
+        border-color: #b35a00;
+        background: #ffe14280;
+      }
+      .message-preview {
+        display: contents;
+      }
+      .message-preview > .message-letter {
+        opacity: 0.42;
+      }
+      .word-completion[aria-pressed="true"] {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .keep-template {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .keep-template input {
+        width: 16px;
+        min-height: 0;
+        height: 16px;
+        margin: 0;
+        accent-color: var(--accent);
+      }
+      .editor-footer .left-actions {
+        flex-wrap: wrap;
+      }
+      .keyboard-grid[hidden] {
+        display: none;
+      }
+      .language-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .language-controls select {
+        min-width: 0;
+        max-width: min(32ch, 60vw);
+        color: var(--ink);
+        background: var(--panel2);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px;
+      }
+      .png-options {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .png-options select {
+        max-width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell" id="appShell">
+      <header>
+        <div class="brand">
+          <div class="emblem" aria-hidden="true">
+            <svg
+              viewBox="0 0 42 42"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M21 4 37 15 31 34 11 34 5 15Z M21 4 21 34 M5 15 37 15 M11 34 31 15 M31 34 11 15"
+              />
+              <circle cx="21" cy="21" r="3" fill="#75e4cd" stroke="none" />
+            </svg>
+          </div>
+          <div>
+            <div class="eyebrow">Proyecto Enigma</div>
+            <h1>Taller de alfabetos</h1>
+            <p class="subtitle">
+              Diseñá tus propios glifos y escribí con ellos.
+            </p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="language-controls">
+            <label for="languageSelect">Lenguaje</label>
+            <select id="languageSelect"></select>
+            <button type="button" id="newLanguageBtn">Nuevo lenguaje</button>
+            <button type="button" id="renameLanguageBtn">Renombrar</button>
+          </div>
+          <div class="storage" id="storageStatus">
+            <span class="dot"></span
+            ><span id="storageText">Guardado local</span>
+          </div>
+          <button id="importBtn" class="ghost">Importar JSON</button
+          ><button id="exportBtn">Exportar alfabeto</button>
+          <button type="button" id="reloadBtn">Actualizar página</button>
+          <input
+            type="file"
+            id="importFile"
+            accept="application/json,.json"
+            class="hidden"
+          />
+        </div>
+      </header>
+      <div class="view-tabs" role="tablist" aria-label="Secciones del taller">
+        <button
+          type="button"
+          id="composerTab"
+          role="tab"
+          aria-controls="composerPanel"
+          aria-selected="true"
+        >
+          Escritura y teclado
+        </button>
+        <button
+          type="button"
+          id="editorTab"
+          role="tab"
+          aria-controls="editorPanel"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          Editor de caracteres
+        </button>
+      </div>
+      <div class="workspace">
+        <section
+          class="panel"
+          id="editorPanel"
+          role="tabpanel"
+          aria-labelledby="editorTab"
+          hidden
+        >
+          <div class="panel-header">
+            <div>
+              <h2 id="editorTitle">Editor de caracteres</h2>
+              <p>Dibujá un símbolo con el mouse, lápiz o dedo.</p>
+            </div>
+            <span class="section-tag" id="editorMode">Nuevo glifo</span>
+          </div>
+          <div class="panel-body">
+            <section
+              id="editorGallery"
+              class="editor-gallery"
+              aria-labelledby="editorGalleryTitle"
+              hidden
+            >
+              <h3 id="editorGalleryTitle">Glifos existentes</h3>
+              <div id="editorGlyphs" class="editor-glyphs"></div>
+            </section>
+            <div class="editor-info">
+              <div class="field">
+                <label for="glyphName">Nombre o significado</label
+                ><input
+                  id="glyphName"
+                  maxlength="48"
+                  placeholder="Ej. letra A (opcional)"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="field">
+                <label for="glyphKey">Tecla</label
+                ><input
+                  id="glyphKey"
+                  maxlength="2"
+                  placeholder="Ej. A"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+            <div class="board-layout">
+              <div class="drawing-board has-grid" id="drawingBoard">
+                <svg
+                  id="drawingSvg"
+                  viewBox="0 0 320 320"
+                  aria-label="Lienzo para dibujar el carácter"
+                  role="img"
+                >
+                  <g id="drawingStrokes"></g>
+                </svg>
+              </div>
+              <div class="board-guides">
+                <span>Área de dibujo</span><span>320 × 320</span>
+              </div>
+            </div>
+            <div class="tools-row">
+              <div class="stroke-control">
+                <label for="strokeWidth">Grosor</label
+                ><input
+                  id="strokeWidth"
+                  type="range"
+                  min="2"
+                  max="18"
+                  value="7"
+                /><span
+                  class="stroke-sample"
+                  id="strokeSample"
+                  aria-hidden="true"
+                  style="width: 7px; height: 7px"
+                ></span>
+              </div>
+              <button
+                id="gridBtn"
+                aria-pressed="true"
+                title="Mostrar u ocultar cuadrícula"
+              >
+                Cuadrícula ✓
+              </button>
+              <button id="undoBtn" title="Deshacer último trazo" disabled>
+                Deshacer</button
+              ><button id="clearDrawingBtn" disabled>Limpiar</button>
+            </div>
+            <label class="keep-template"
+              ><input type="checkbox" id="keepGlyphTemplate" />Conservar el
+              dibujo como plantilla al guardar</label
+            >
+            <div class="editor-footer">
+              <div class="left-actions">
+                <button id="newBtn" class="ghost">Nuevo</button
+                ><button type="button" id="useGlyphTemplate" class="hidden">
+                  Usar como plantilla</button
+                ><button id="deleteBtn" class="danger hidden">Eliminar</button>
+              </div>
+              <button class="primary" id="saveGlyphBtn" disabled>
+                Guardar glifo
+              </button>
+            </div>
+            <p class="hint">
+              Cada símbolo guarda sus trazos originales: podés editarlo más
+              adelante sin volver a dibujarlo.
+            </p>
+          </div>
+        </section>
+
+        <section
+          class="panel composer-panel"
+          id="composerPanel"
+          role="tabpanel"
+          aria-labelledby="composerTab"
+        >
+          <div class="panel-header">
+            <div>
+              <h2 id="composerTitle">Escritura y teclado</h2>
+              <p>Componé mensajes en tu propio alfabeto.</p>
+            </div>
+            <span class="section-tag" id="glyphCount">0 caracteres</span>
+          </div>
+          <div class="panel-body">
+            <div class="composer-tools">
+              <div class="message-zoom">
+                <label for="messageZoom">Zoom</label
+                ><input
+                  type="range"
+                  id="messageZoom"
+                  min="40"
+                  max="175"
+                  step="5"
+                  value="100"
+                /><output id="messageZoomValue" for="messageZoom">100%</output>
+              </div>
+              <select
+                class="punctuation-picker"
+                id="punctuationPicker"
+                aria-label="Insertar signo de puntuación"
+              >
+                <option value="">Puntuación</option>
+                <option>&#46;</option>
+                <option>&#44;</option>
+                <option>&#59;</option>
+                <option>&#58;</option>
+                <option>&#191;</option>
+                <option>&#63;</option>
+                <option>&#161;</option>
+                <option>&#33;</option>
+                <option>&#8230;</option>
+                <option>&#40;</option>
+                <option>&#41;</option>
+                <option>&#91;</option>
+                <option>&#93;</option>
+                <option>&#171;</option>
+                <option>&#187;</option>
+                <option>&#34;</option>
+                <option>&#39;</option>
+                <option>&#8212;</option>
+                <option>&#45;</option>
+              </select>
+              <button type="button" id="sourceImageBtn">Agregar imagen</button>
+              <input type="file" id="sourceImageFile" accept="image/*" hidden />
+              <button
+                type="button"
+                id="toggleKeyboardBtn"
+                aria-expanded="true"
+                aria-controls="virtualKeyboard"
+              >
+                Ocultar teclado
+              </button>
+              <button
+                type="button"
+                id="invertMessageBtn"
+                aria-pressed="false"
+                aria-controls="message"
+              >
+                Invertir
+              </button>
+              <button id="referenceBtn" aria-pressed="false">
+                Ver referencias</button
+              ><button id="copyRefBtn">Copiar referencias</button
+              ><span class="push"></span
+              ><label class="png-options"
+                >Formato PNG
+                <select id="pngFormat" class="punctuation-picker">
+                  <option value="original">Original · solo glifos</option>
+                  <option value="palabras">
+                    Glifos y palabras descubiertas
+                  </option>
+                  <option value="equivalencias">
+                    Glifos, letras y palabras
+                  </option>
+                  <option value="invertido">Invertido · letras y glifos</option>
+                  <option value="invertido-palabras">
+                    Invertido con palabras
+                  </option>
+                </select></label
+              ><button id="pngBtn">Descargar PNG</button
+              ><button id="clearMessageBtn" class="ghost danger">
+                Borrar mensaje
+              </button>
+              <button type="button" id="expandComposerBtn" aria-pressed="false">
+                Ampliar lienzo y teclado
+              </button>
+            </div>
+            <div class="composer-canvas">
+              <aside
+                id="sourceImagePanel"
+                class="source-image-panel"
+                aria-label="Imagen de referencia"
+                hidden
+              >
+                <div class="source-image-tools">
+                  <button
+                    type="button"
+                    id="toggleSourceMark"
+                    aria-pressed="false"
+                  >
+                    Resaltar
+                  </button>
+                  <button type="button" id="undoSourceMark" disabled>
+                    Deshacer marca
+                  </button>
+                  <button type="button" id="removeSourceImage">
+                    Quitar imagen
+                  </button>
+                </div>
+                <div id="sourceImageScroll" class="source-image-scroll">
+                  <div id="sourceImageStage" class="source-image-stage">
+                    <img
+                      id="sourceImage"
+                      alt="Texto original en glifos"
+                      draggable="false"
+                    />
+                  </div>
+                </div>
+              </aside>
+              <div
+                class="paper"
+                id="paper"
+                tabindex="0"
+                aria-label="Mensaje en glifos. Usá el teclado de la aplicación o las teclas asignadas."
+              >
+                <div id="message" class="message" aria-live="polite"></div>
+              </div>
+            </div>
+            <div id="reference" class="reference" hidden>
+              <strong>Texto de referencia</strong
+              ><span id="referenceText"></span>
+            </div>
+
+            <div
+              class="keyboard-grid"
+              id="virtualKeyboard"
+              role="group"
+              aria-label="Teclado virtual"
+            >
+              <div class="keyboard-glyphs" id="keyboard"></div>
+              <div class="keyboard-controls">
+                <button type="button" class="keyboard-control" id="spaceBtn">
+                  Espacio
+                </button>
+                <button type="button" class="keyboard-control" id="newlineBtn">
+                  ↵ Salto
+                </button>
+                <button
+                  type="button"
+                  class="keyboard-control"
+                  id="backspaceBtn"
+                >
+                  ⌫ Borrar
+                </button>
+              </div>
+            </div>
+            <p class="hint">
+              Las letras dibujadas son imágenes vectoriales, no caracteres
+              Unicode. Descargá el mensaje como PNG para compartirlo tal cual.
+            </p>
+          </div>
+        </section>
+      </div>
+      <div class="footnote">
+        <span>Enigma · Herramienta autónoma, sin conexión a internet.</span
+        ><span>Respaldo JSON: alfabeto, mensaje y traducciones.</span>
+      </div>
+    </main>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script>
+      (() => {
+        "use strict";
+        const NS = "http://www.w3.org/2000/svg";
+        const KEY = "enigma-alfabeto-v1";
+        const $ = (id) => document.getElementById(id);
+        const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+        const clone = (value) => JSON.parse(JSON.stringify(value));
+        const normalizeKey = (key) =>
+          String(key || "")
+            .trim()
+            .normalize("NFC")
+            .toLocaleLowerCase("es");
+        const newId = () =>
+          globalThis.crypto?.randomUUID?.() ||
+          "g-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random().toString(36).slice(2);
+        const languageRegistryKey = KEY + "-languages";
+        const originalLanguage = { id: "original", name: "Primer lenguaje" };
+        const languageStates = new Map();
+        const emptyState = () => ({
+          version: 1,
+          glyphs: [],
+          message: [],
+          dictionary: [],
+          translation: "",
+        });
+        let languages = [originalLanguage];
+        let activeLanguage = originalLanguage.id;
+        let state = emptyState();
+
+        function languageStorageKey(id) {
+          return id === originalLanguage.id ? KEY : KEY + "-language-" + id;
+        }
+
+        function readLanguageRegistry() {
+          let registry;
+          try {
+            registry = JSON.parse(localStorage.getItem(languageRegistryKey));
+          } catch {
+            return;
+          }
+          if (!Array.isArray(registry?.languages)) return;
+          const saved = new Map([[originalLanguage.id, originalLanguage]]);
+          for (const language of registry.languages) {
+            if (
+              typeof language?.id === "string" &&
+              /^[a-z0-9-]+$/i.test(language.id) &&
+              typeof language.name === "string" &&
+              language.name.trim()
+            ) {
+              saved.set(language.id, {
+                id: language.id,
+                name: language.name.trim().slice(0, 60),
+              });
+            }
+          }
+          languages = [...saved.values()];
+          if (saved.has(registry.active)) activeLanguage = registry.active;
+        }
+
+        function writeLanguageRegistry() {
+          try {
+            localStorage.setItem(
+              languageRegistryKey,
+              JSON.stringify({ active: activeLanguage, languages }),
+            );
+          } catch {
+            toast(
+              "No se pudo guardar la lista de lenguajes en el navegador.",
+              true,
+            );
+          }
+        }
+
+        function loadLanguageState(id) {
+          if (languageStates.has(id)) return languageStates.get(id);
+          const raw = localStorage.getItem(languageStorageKey(id));
+          return raw ? validate(JSON.parse(raw)) : emptyState();
+        }
+        let selected = null,
+          draft = [],
+          history = [],
+          active = null,
+          dirty = false,
+          hasGrid = true,
+          toastTimer;
+        let strokePx = Number($("strokeWidth").value);
+
+        const viewTabs = [$("composerTab"), $("editorTab")];
+
+        function showView(activeTab) {
+          for (const tab of viewTabs) {
+            const selected = tab === activeTab;
+            tab.setAttribute("aria-selected", String(selected));
+            tab.tabIndex = selected ? 0 : -1;
+            $(tab.getAttribute("aria-controls")).hidden = !selected;
+          }
+        }
+
+        for (const [index, tab] of viewTabs.entries()) {
+          tab.addEventListener("click", () => showView(tab));
+          tab.addEventListener("keydown", (event) => {
+            const nextTab = {
+              ArrowLeft: viewTabs[1 - index],
+              ArrowRight: viewTabs[1 - index],
+              Home: viewTabs[0],
+              End: viewTabs[1],
+            }[event.key];
+            if (!viewTabs.includes(nextTab)) return;
+
+            event.preventDefault();
+            showView(nextTab);
+            nextTab.focus();
+          });
+        }
+
+        function toast(txt, error = false) {
+          const el = $("toast");
+          clearTimeout(toastTimer);
+          el.textContent = txt;
+          el.classList.toggle("error", error);
+          el.classList.add("show");
+          toastTimer = setTimeout(() => el.classList.remove("show"), 2500);
+        }
+        function saveState() {
+          languageStates.set(activeLanguage, state);
+          try {
+            localStorage.setItem(
+              languageStorageKey(activeLanguage),
+              JSON.stringify(state),
+            );
+            $("storageStatus").classList.remove("warn");
+            $("storageText").textContent = "Guardado local";
+          } catch {
+            $("storageStatus").classList.add("warn");
+            $("storageText").textContent = "Guardado no disponible";
+          }
+        }
+        function isPunctuation(text) {
+          return typeof text === "string" && /^\p{P}$/u.test(text);
+        }
+        function validate(raw) {
+          if (
+            !raw ||
+            raw.version !== 1 ||
+            !Array.isArray(raw.glyphs) ||
+            !Array.isArray(raw.message) ||
+            raw.glyphs.length > 2000
+          )
+            throw new Error(
+              "El archivo no corresponde a un alfabeto Enigma compatible.",
+            );
+          const ids = new Set(),
+            keys = new Set();
+          const glyphs = raw.glyphs.map((g, i) => {
+            if (
+              !g ||
+              typeof g.id !== "string" ||
+              !g.id ||
+              ids.has(g.id) ||
+              !Array.isArray(g.strokes) ||
+              g.strokes.length > 2000
+            )
+              throw new Error("Hay caracteres inválidos o duplicados.");
+            ids.add(g.id);
+            const key = normalizeKey(g.key);
+            if (key && (Array.from(key).length !== 1 || keys.has(key)))
+              throw new Error(
+                "El archivo contiene teclas inválidas o duplicadas.",
+              );
+            if (key) keys.add(key);
+            const strokes = g.strokes.map((s) => {
+              if (
+                !s ||
+                !Number.isFinite(s.width) ||
+                !Array.isArray(s.points) ||
+                !s.points.length ||
+                s.points.length > 100000
+              )
+                throw new Error("Hay trazos inválidos.");
+              return {
+                width: clamp(s.width, 1, 30),
+                points: s.points.map((pt) => {
+                  if (
+                    !Array.isArray(pt) ||
+                    pt.length !== 2 ||
+                    !pt.every(Number.isFinite)
+                  )
+                    throw new Error("Hay coordenadas inválidas.");
+                  return [clamp(pt[0], 0, 320), clamp(pt[1], 0, 320)];
+                }),
+              };
+            });
+            if (!strokes.length)
+              throw new Error("El archivo contiene glifos vacíos.");
+            return {
+              id: g.id,
+              name:
+                typeof g.name === "string" && g.name.trim()
+                  ? g.name.trim().slice(0, 48)
+                  : `Glifo ${i + 1}`,
+              key,
+              strokes,
+            };
+          });
+          if (raw.message.length > 100000)
+            throw new Error("El mensaje es demasiado largo.");
+          const message = raw.message.map((token) => {
+            if (token?.type === "space" || token?.type === "newline")
+              return { type: token.type };
+            if (token?.type === "punctuation" && isPunctuation(token.text))
+              return { type: "punctuation", text: token.text };
+            if (token?.type === "glyph" && ids.has(token.id)) {
+              const glyph = { type: "glyph", id: token.id };
+              if (typeof token.annotation === "string")
+                glyph.annotation = token.annotation;
+              return glyph;
+            }
+            throw new Error(
+              "El mensaje contiene una referencia a un glifo inexistente.",
+            );
+          });
+          const dictionary = new Map();
+          if (Array.isArray(raw.dictionary)) {
+            for (const entry of raw.dictionary) {
+              if (
+                !Array.isArray(entry?.ids) ||
+                !entry.ids.length ||
+                !entry.ids.every((id) => ids.has(id)) ||
+                typeof entry.text !== "string"
+              )
+                continue;
+              const text = entry.text.trim().slice(0, 100);
+              if (text)
+                dictionary.set(JSON.stringify(entry.ids), {
+                  ids: entry.ids,
+                  text,
+                });
+            }
+          }
+          const translation =
+            typeof raw.translation === "string"
+              ? raw.translation.slice(0, 100000)
+              : "";
+          return {
+            version: 1,
+            glyphs,
+            message,
+            dictionary: [...dictionary.values()],
+            translation,
+          };
+        }
+        try {
+          readLanguageRegistry();
+          state = loadLanguageState(activeLanguage);
+        } catch {
+          $("storageStatus").classList.add("warn");
+          $("storageText").textContent = "No se pudo leer el respaldo local";
+        }
+
+        const svgEl = (tag, attrs = {}) => {
+          const el = document.createElementNS(NS, tag);
+          for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+          return el;
+        };
+        function strokeShape(s) {
+          if (s.points.length === 1)
+            return svgEl("circle", {
+              cx: s.points[0][0],
+              cy: s.points[0][1],
+              r: s.width / 2,
+              fill: "currentColor",
+            });
+          return svgEl("polyline", {
+            points: s.points.map((p) => p.join(",")).join(" "),
+            fill: "none",
+            stroke: "currentColor",
+            "stroke-width": s.width,
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+          });
+        }
+        function glyphSvg(g, cls) {
+          const el = svgEl("svg", {
+            viewBox: "0 0 320 320",
+            class: cls,
+            "aria-hidden": "true",
+          });
+          for (const s of g.strokes) el.append(strokeShape(s));
+          return el;
+        }
+        function drawDraft() {
+          const group = $("drawingStrokes");
+          group.replaceChildren(...draft.map(strokeShape));
+        }
+        function updateEditor() {
+          $("undoBtn").disabled = history.length === 0;
+          $("clearDrawingBtn").disabled = draft.length === 0;
+          $("saveGlyphBtn").disabled = draft.length === 0;
+          $("editorMode").textContent = selected
+            ? "Editando glifo"
+            : "Nuevo glifo";
+          $("saveGlyphBtn").textContent = selected
+            ? "Guardar cambios"
+            : "Guardar glifo";
+          $("deleteBtn").classList.toggle("hidden", !selected);
+          $("useGlyphTemplate").classList.toggle("hidden", !selected);
+        }
+        function loadEditor(id = null, force = false, template = null) {
+          if (
+            !force &&
+            dirty &&
+            !confirm("Hay cambios sin guardar. ¿Descartarlos?")
+          )
+            return false;
+          const g = state.glyphs.find((item) => item.id === id);
+          selected = g?.id || null;
+          draft = clone(g?.strokes ?? template ?? []);
+          history = [];
+          active = null;
+          dirty = false;
+          $("glyphName").value = g?.name || "";
+          $("glyphKey").value = g?.key || "";
+          drawDraft();
+          updateEditor();
+          renderKeyboard();
+          renderEditorGlyphs();
+          return true;
+        }
+        function pointFor(e) {
+          const box = $("drawingSvg").getBoundingClientRect();
+          return [
+            Math.round(
+              clamp(((e.clientX - box.left) / box.width) * 320, 0, 320) * 10,
+            ) / 10,
+            Math.round(
+              clamp(((e.clientY - box.top) / box.height) * 320, 0, 320) * 10,
+            ) / 10,
+          ];
+        }
+        function remember() {
+          history.push(clone(draft));
+          if (history.length > 40) history.shift();
+        }
+        $("drawingSvg").addEventListener("pointerdown", (e) => {
+          if (active !== null || e.button !== 0) return;
+          e.preventDefault();
+          $("drawingSvg").setPointerCapture(e.pointerId);
+          remember();
+          active = e.pointerId;
+          draft.push({ width: strokePx, points: [pointFor(e)] });
+          dirty = true;
+          drawDraft();
+          updateEditor();
+        });
+        $("drawingSvg").addEventListener("pointermove", (e) => {
+          if (active !== e.pointerId) return;
+          e.preventDefault();
+          const s = draft[draft.length - 1];
+          const events = e.getCoalescedEvents?.() || [];
+          for (const pe of events.length ? events : [e]) {
+            const p = pointFor(pe),
+              last = s.points[s.points.length - 1];
+            if (Math.hypot(p[0] - last[0], p[1] - last[1]) >= 0.35)
+              s.points.push(p);
+          }
+          drawDraft();
+        });
+        function finishStroke(e) {
+          if (active !== e.pointerId) return;
+          active = null;
+          if ($("drawingSvg").hasPointerCapture(e.pointerId))
+            $("drawingSvg").releasePointerCapture(e.pointerId);
+          updateEditor();
+        }
+        $("drawingSvg").addEventListener("pointerup", finishStroke);
+        $("drawingSvg").addEventListener("pointercancel", finishStroke);
+        $("drawingSvg").addEventListener("lostpointercapture", finishStroke);
+        $("strokeWidth").addEventListener("input", () => {
+          strokePx = Number($("strokeWidth").value);
+          $("strokeSample").style.width = strokePx + "px";
+          $("strokeSample").style.height = strokePx + "px";
+        });
+        $("gridBtn").addEventListener("click", () => {
+          hasGrid = !hasGrid;
+          $("drawingBoard").classList.toggle("has-grid", hasGrid);
+          $("gridBtn").textContent = hasGrid ? "Cuadrícula ✓" : "Cuadrícula";
+          $("gridBtn").setAttribute("aria-pressed", String(hasGrid));
+        });
+        for (const id of ["glyphName", "glyphKey"])
+          $(id).addEventListener("input", () => (dirty = true));
+        $("undoBtn").addEventListener("click", () => {
+          if (!history.length) return;
+          draft = history.pop();
+          dirty = true;
+          drawDraft();
+          updateEditor();
+        });
+        $("clearDrawingBtn").addEventListener("click", () => {
+          if (!draft.length) return;
+          remember();
+          draft = [];
+          dirty = true;
+          drawDraft();
+          updateEditor();
+        });
+        $("newBtn").addEventListener("click", () => loadEditor());
+        $("useGlyphTemplate").addEventListener("click", () => {
+          const glyph = state.glyphs.find((item) => item.id === selected);
+          if (glyph && loadEditor(null, false, glyph.strokes))
+            $("glyphName").focus();
+        });
+        $("saveGlyphBtn").addEventListener("click", () => {
+          if (!draft.length) return;
+          const key = normalizeKey($("glyphKey").value);
+          if (key && Array.from(key).length !== 1) {
+            toast("Asigná una sola letra, número o símbolo.", true);
+            return;
+          }
+          if (
+            key &&
+            state.glyphs.some((g) => g.key === key && g.id !== selected)
+          ) {
+            toast("Esa tecla ya corresponde a otro glifo.", true);
+            return;
+          }
+          const name =
+            $("glyphName").value.trim() ||
+            `Glifo ${state.glyphs.length + (selected ? 0 : 1)}`;
+          const glyph = {
+            id: selected || newId(),
+            name,
+            key,
+            strokes: clone(draft),
+          };
+          const idx = state.glyphs.findIndex((g) => g.id === selected);
+          if (idx >= 0) state.glyphs[idx] = glyph;
+          else state.glyphs.push(glyph);
+          saveState();
+          const wasEditing = Boolean(selected);
+          const keepTemplate = $("keepGlyphTemplate").checked;
+          loadEditor(null, true, keepTemplate ? glyph.strokes : null);
+          if (keepTemplate) $("glyphName").focus();
+          renderMessage();
+          toast(
+            wasEditing ? "Cambios guardados." : "Glifo añadido al teclado.",
+          );
+        });
+        $("deleteBtn").addEventListener("click", () => {
+          const g = state.glyphs.find((g) => g.id === selected);
+          if (!g) return;
+          const used = state.message.filter(
+            (t) => t.type === "glyph" && t.id === g.id,
+          ).length;
+          if (
+            !confirm(
+              `¿Eliminar «${g.name}»?${used ? " También se quitarán sus " + used + " apariciones en el mensaje." : ""}`,
+            )
+          )
+            return;
+          wordBeingEdited = null;
+          state.glyphs = state.glyphs.filter((x) => x.id !== g.id);
+          state.message = state.message.filter(
+            (t) => t.type !== "glyph" || t.id !== g.id,
+          );
+          state.dictionary = state.dictionary.filter(
+            (entry) => !entry.ids.includes(g.id),
+          );
+          saveState();
+          loadEditor(null, true);
+          renderMessage();
+          toast("Glifo eliminado.");
+        });
+        function keyboardShortcuts(glyphs) {
+          const shortcuts = new Map();
+          const inferred = new Map();
+          for (const glyph of glyphs) {
+            if (glyph.key) {
+              shortcuts.set(glyph.key, glyph);
+              continue;
+            }
+            const letter = normalizeKey(glyph.name);
+            if (/^\p{L}$/u.test(letter))
+              inferred.set(letter, inferred.has(letter) ? null : glyph);
+          }
+          for (const [letter, glyph] of inferred) {
+            if (glyph && !shortcuts.has(letter)) shortcuts.set(letter, glyph);
+          }
+          return shortcuts;
+        }
+
+        let shortcuts = new Map();
+        function renderKeyboard() {
+          shortcuts = keyboardShortcuts(state.glyphs);
+          const keyboard = $("keyboard");
+          keyboard.replaceChildren();
+          $("glyphCount").textContent =
+            state.glyphs.length +
+            (state.glyphs.length === 1 ? " carácter" : " caracteres");
+          if (!state.glyphs.length) {
+            const empty = document.createElement("div");
+            empty.className = "empty-state";
+            empty.innerHTML =
+              '<div class="empty-icon">◇</div><strong>Tu alfabeto empieza acá</strong><span>Dibujá y guardá el primer carácter en el editor.</span>';
+            keyboard.append(empty);
+            return;
+          }
+          for (const glyph of state.glyphs) {
+            const cell = document.createElement("div");
+            cell.className = "key-cell";
+            const key = document.createElement("button");
+            key.type = "button";
+            key.className = "glyph-key";
+            key.title = "Escribir " + glyph.name;
+            key.setAttribute("aria-label", key.title);
+            const name = document.createElement("span");
+            name.className = "key-name";
+            name.textContent = glyphEquivalent(glyph);
+            key.append(glyphSvg(glyph, "key-art"), name);
+            key.addEventListener("click", () =>
+              insert({ type: "glyph", id: glyph.id }),
+            );
+            cell.append(key);
+            keyboard.append(cell);
+          }
+        }
+
+        function renderEditorGlyphs() {
+          const gallery = $("editorGlyphs");
+          gallery.replaceChildren();
+          $("editorGallery").hidden = state.glyphs.length === 0;
+          for (const glyph of state.glyphs) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "editor-glyph";
+            button.title = "Editar " + glyph.name;
+            button.setAttribute("aria-label", button.title);
+            button.setAttribute("aria-pressed", String(glyph.id === selected));
+            const label = document.createElement("span");
+            label.textContent = glyphEquivalent(glyph);
+            button.append(glyphSvg(glyph, "key-art"), label);
+            button.addEventListener("click", () => {
+              if (loadEditor(glyph.id)) $("glyphName").focus();
+            });
+            gallery.append(button);
+          }
+        }
+        function glyphEquivalent(glyph) {
+          return glyph?.key?.toUpperCase() || glyph?.name || "?";
+        }
+        function referenceString() {
+          const map = new Map(state.glyphs.map((g) => [g.id, g]));
+          return state.message
+            .map((t) =>
+              t.type === "space"
+                ? " "
+                : t.type === "newline"
+                  ? "\n"
+                  : t.type === "punctuation"
+                    ? t.text
+                    : glyphEquivalent(map.get(t.id)),
+            )
+            .join("");
+        }
+        let wordBeingEdited = null;
+        let messageCursor = state.message.length;
+        let cursorColumn = null;
+        const caretAnchors = [];
+        const wordKeyboardActions = new Map();
+        const arrowKeys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
+
+        function applyAnnotation(word, ids) {
+          const missingGlyphs = ids
+            .slice(word.ids.length)
+            .map((id) => ({ type: "glyph", id }));
+          const end = word.start + word.ids.length;
+          state.message.splice(end, 0, ...missingGlyphs);
+          if (messageCursor >= end) messageCursor += missingGlyphs.length;
+          cursorColumn = null;
+          word.first.annotation = JSON.stringify(ids);
+          wordBeingEdited = null;
+          saveState();
+          renderMessage();
+          $("paper").focus({ preventScroll: true });
+        }
+
+        function saveWordAnnotation(word, text, existing) {
+          if (!text) return;
+          if (existing) existing.text = text;
+          else state.dictionary.push({ ids: word.ids, text });
+          applyAnnotation(word, word.ids);
+        }
+
+        function renderWordAnnotation(word, element, existing, reference) {
+          const form = document.createElement("form");
+          form.className = "word-annotation-form";
+          const input = document.createElement("input");
+          input.setAttribute("aria-label", "Palabra descubierta");
+          input.placeholder = "Palabra descubierta";
+          input.maxLength = 100;
+          input.required = true;
+          const save = document.createElement("button");
+          save.type = "submit";
+          save.textContent = "Guardar";
+          input.value = existing?.text ?? reference;
+          form.append(input, save);
+          form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            saveWordAnnotation(word, input.value.trim(), existing);
+          });
+          const completions = document.createElement("div");
+          completions.className = "word-suggestions";
+          completions.setAttribute("role", "group");
+          completions.setAttribute(
+            "aria-label",
+            "Completar palabra descubierta",
+          );
+          input.addEventListener("input", () => {
+            completions.replaceChildren();
+            const prefix = normalizeKey(input.value);
+            if (!prefix) return;
+            const seen = new Set();
+            for (const { text } of state.dictionary) {
+              const normalized = normalizeKey(text);
+              if (
+                normalized === prefix ||
+                !normalized.startsWith(prefix) ||
+                seen.has(normalized)
+              )
+                continue;
+              seen.add(normalized);
+              const button = document.createElement("button");
+              button.type = "button";
+              button.textContent = text;
+              button.addEventListener("click", () =>
+                saveWordAnnotation(word, text, existing),
+              );
+              completions.append(button);
+              if (seen.size === 8) break;
+            }
+          });
+          element.append(form, completions);
+          return input;
+        }
+
+        function renderWordSuggestions(
+          word,
+          element,
+          exactSuggestion,
+          glyphButton,
+          glyphs,
+        ) {
+          const suggestions = [];
+          if (exactSuggestion) suggestions.push(exactSuggestion);
+          if (
+            word.start + word.ids.length === state.message.length ||
+            wordBeingEdited === word.first
+          ) {
+            for (const entry of state.dictionary) {
+              if (suggestions.length >= 8) break;
+              if (
+                entry.ids.length > word.ids.length &&
+                word.ids.every((id, i) => entry.ids[i] === id)
+              ) {
+                suggestions.push(entry);
+              }
+            }
+          }
+          if (!suggestions.length) return;
+          const group = document.createElement("div");
+          group.className = "word-suggestions";
+          group.setAttribute("role", "group");
+          group.setAttribute("aria-label", "Palabras sugeridas");
+          const preview = document.createElement("span");
+          preview.className = "message-preview";
+          preview.setAttribute("aria-hidden", "true");
+          glyphButton.append(preview);
+          let previewed = null;
+          const buttons = new Map();
+          function showPreview(entry) {
+            if (previewed === entry) return;
+            buttons.get(previewed)?.setAttribute("aria-pressed", "false");
+            previewed = entry;
+            buttons.get(entry).setAttribute("aria-pressed", "true");
+            const remaining = entry.ids.slice(word.ids.length);
+            preview.replaceChildren(
+              ...remaining.map((id) => renderMessageLetter(glyphs.get(id))),
+            );
+          }
+          for (const entry of suggestions) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = entry.text;
+            button.className = "word-completion";
+            button.setAttribute("aria-pressed", "false");
+            buttons.set(entry, button);
+            button.addEventListener("pointerenter", (event) => {
+              if (event.pointerType !== "touch") showPreview(entry);
+            });
+            button.addEventListener("focus", () => {
+              if (button.matches(":focus-visible")) showPreview(entry);
+            });
+            button.addEventListener("click", () => {
+              if (entry === previewed || entry.ids.length === word.ids.length)
+                applyAnnotation(word, entry.ids);
+              else showPreview(entry);
+            });
+            group.append(button);
+          }
+          element.append(group);
+          showPreview(
+            suggestions.find((entry) => entry.ids.length > word.ids.length) ??
+              suggestions[0],
+          );
+          return {
+            next:
+              suggestions.length > 1
+                ? () => {
+                    showPreview(
+                      suggestions[
+                        (suggestions.indexOf(previewed) + 1) %
+                          suggestions.length
+                      ],
+                    );
+                  }
+                : null,
+            accept: () => applyAnnotation(word, previewed.ids),
+          };
+        }
+
+        function placeMessageCaret(reveal = false, completedWordEnd = null) {
+          const anchor = caretAnchors[messageCursor];
+          const message = $("message");
+          let caret = message.querySelector(".message-caret");
+          if (anchor) {
+            if (!caret) caret = messageCaret();
+            anchor.append(caret);
+            if (reveal) {
+              const paper = $("paper");
+              const bounds = paper.getBoundingClientRect();
+              const caretBounds = caret.getBoundingClientRect();
+              const saveButton = caretAnchors[completedWordEnd]
+                ?.closest(".message-word")
+                ?.querySelector(".word-quick-save");
+              const saveBounds = saveButton?.getBoundingClientRect();
+              let { top, bottom } = caretBounds;
+              if (saveBounds) {
+                top = Math.min(top, saveBounds.top);
+                bottom = Math.max(bottom, saveBounds.bottom);
+                if (bottom - top > bounds.bottom - bounds.top)
+                  ({ top, bottom } = saveBounds);
+              }
+              if (top < bounds.top) paper.scrollTop += top - bounds.top;
+              else if (bottom > bounds.bottom)
+                paper.scrollTop += bottom - bounds.bottom;
+            }
+          }
+          $("backspaceBtn").disabled = messageCursor === 0;
+        }
+
+        function moveMessageCursor(key) {
+          if (key === "ArrowLeft" || key === "ArrowRight") {
+            cursorColumn = null;
+            const direction = key === "ArrowLeft" ? -1 : 1;
+            messageCursor = clamp(
+              messageCursor + direction,
+              0,
+              state.message.length,
+            );
+          } else if (caretAnchors[messageCursor]) {
+            const positions = caretAnchors.map((anchor) => {
+              const rect = anchor.getBoundingClientRect();
+              return {
+                x: anchor.classList.contains("message-line")
+                  ? rect.left
+                  : rect.right,
+                y: rect.top,
+              };
+            });
+            const current = positions[messageCursor];
+            cursorColumn ??= current.x;
+            const direction = key === "ArrowUp" ? -1 : 1;
+            let nearestRow = Infinity;
+            let nearestColumn = Infinity;
+            for (const [index, position] of positions.entries()) {
+              const row = (position.y - current.y) * direction;
+              if (row <= 1 || row > nearestRow + 1) continue;
+              const column = Math.abs(position.x - cursorColumn);
+              if (row < nearestRow - 1 || column < nearestColumn) {
+                nearestRow = row;
+                nearestColumn = column;
+                messageCursor = index;
+              }
+            }
+          }
+          placeMessageCaret(true);
+        }
+
+        function messageCaret() {
+          const caret = document.createElement("span");
+          caret.className = "message-caret";
+          caret.setAttribute("aria-hidden", "true");
+          return caret;
+        }
+
+        function renderMessageLetter(
+          glyph,
+          equivalent = glyphEquivalent(glyph),
+        ) {
+          const letter = document.createElement("span");
+          letter.className = "message-letter";
+          const label = document.createElement("span");
+          label.className = "message-equivalence";
+          label.textContent = equivalent;
+          label.title = equivalent;
+          letter.append(label, glyphSvg(glyph, "message-symbol"));
+          return letter;
+        }
+
+        function renderWord(word, glyphs, exact) {
+          const element = document.createElement("div");
+          element.className = "message-word";
+          const glyphButton = document.createElement("button");
+          glyphButton.type = "button";
+          glyphButton.className = "message-word-glyphs";
+          const equivalents = [];
+          glyphButton.setAttribute(
+            "aria-expanded",
+            String(wordBeingEdited === word.first),
+          );
+          for (const [offset, id] of word.ids.entries()) {
+            const glyph = glyphs.get(id);
+            const equivalent = glyphEquivalent(glyph);
+            equivalents.push(equivalent);
+            const letter = renderMessageLetter(glyph, equivalent);
+            glyphButton.append(letter);
+            caretAnchors[word.start + offset + 1] = letter;
+          }
+          glyphButton.setAttribute(
+            "aria-label",
+            "Anotar palabra en glifos: " + equivalents.join(" "),
+          );
+          element.append(glyphButton);
+          const hasWordBoundary =
+            word.start + word.ids.length < state.message.length;
+          const showAnnotation =
+            exact && (hasWordBoundary || word.first.annotation === word.key);
+          if (showAnnotation) {
+            const annotation = document.createElement("span");
+            annotation.className = "message-annotation";
+            annotation.textContent = exact.text;
+            element.append(annotation);
+          }
+          const editing = wordBeingEdited === word.first;
+          const suggestions =
+            !showAnnotation || editing
+              ? renderWordSuggestions(
+                  word,
+                  element,
+                  showAnnotation ? null : exact,
+                  glyphButton,
+                  glyphs,
+                )
+              : null;
+          const reference = equivalents.every((letter) =>
+            /^\p{L}\p{M}*$/u.test(letter),
+          )
+            ? normalizeKey(equivalents.join(""))
+            : "";
+          const suggestedText = reference.length <= 100 ? reference : "";
+          const quickSave =
+            word.ids.length > 1 && !exact && !editing && suggestedText
+              ? () => saveWordAnnotation(word, suggestedText)
+              : null;
+          if (suggestions || quickSave) {
+            wordKeyboardActions.set(
+              word.start + word.ids.length,
+              suggestions ?? { accept: quickSave },
+            );
+          }
+          if (hasWordBoundary && quickSave) {
+            const actions = document.createElement("div");
+            actions.className = "word-suggestions";
+            const save = document.createElement("button");
+            save.type = "button";
+            save.className = "word-quick-save";
+            save.textContent = "Guardar «" + suggestedText + "»";
+            save.addEventListener("click", quickSave);
+            actions.append(save);
+            element.append(actions);
+          }
+          const input = editing
+            ? renderWordAnnotation(word, element, exact, suggestedText)
+            : null;
+          glyphButton.addEventListener("click", () => {
+            wordBeingEdited =
+              wordBeingEdited === word.first ? null : word.first;
+            (renderMessage() ?? $("paper")).focus();
+          });
+          return { element, input };
+        }
+
+        function renderMessage() {
+          const message = $("message");
+          message.replaceChildren();
+          caretAnchors.length = 0;
+          wordKeyboardActions.clear();
+          messageCursor = Math.min(messageCursor, state.message.length);
+          const glyphs = new Map(
+            state.glyphs.map((glyph) => [glyph.id, glyph]),
+          );
+          const dictionary = new Map(
+            state.dictionary.map((entry) => [JSON.stringify(entry.ids), entry]),
+          );
+          let line = document.createElement("div");
+          line.className = "message-line";
+          if (state.message.length) {
+            message.append(line);
+            caretAnchors[0] = line;
+          }
+          let activeInput = null;
+          let index = 0;
+          while (index < state.message.length) {
+            const token = state.message[index];
+            if (token.type === "glyph") {
+              const start = index;
+              const ids = [];
+              while (state.message[index]?.type === "glyph")
+                ids.push(state.message[index++].id);
+              const key = JSON.stringify(ids);
+              const { element, input } = renderWord(
+                { start, ids, key, first: token },
+                glyphs,
+                dictionary.get(key),
+              );
+              line.append(element);
+              if (input) activeInput = input;
+              continue;
+            }
+            if (token.type === "newline") {
+              line = document.createElement("div");
+              line.className = "message-line";
+              message.append(line);
+              caretAnchors[index + 1] = line;
+            } else if (token.type === "punctuation") {
+              const sign = document.createElement("span");
+              sign.className = "message-punctuation";
+              sign.textContent = token.text;
+              line.append(sign);
+              caretAnchors[index + 1] = sign;
+            } else {
+              const space = document.createElement("span");
+              space.className = "message-space";
+              space.setAttribute("aria-hidden", "true");
+              line.append(space);
+              caretAnchors[index + 1] = space;
+            }
+            index++;
+          }
+          placeMessageCaret();
+          $("referenceText").textContent = referenceString() || "—";
+          for (const id of ["clearMessageBtn", "pngBtn", "copyRefBtn"])
+            $(id).disabled = state.message.length === 0;
+          return activeInput;
+        }
+        function refreshMessageAfterEdit(completedWordEnd = null) {
+          wordBeingEdited = null;
+          cursorColumn = null;
+          renderMessage();
+          placeMessageCaret(true, completedWordEnd);
+          saveState();
+        }
+
+        function insert(token) {
+          const completesWord =
+            token.type !== "glyph" &&
+            state.message[messageCursor - 1]?.type === "glyph";
+          const completedWordEnd = completesWord ? messageCursor : null;
+          state.message.splice(messageCursor, 0, token);
+          messageCursor++;
+          refreshMessageAfterEdit(completedWordEnd);
+        }
+
+        function backspace() {
+          if (messageCursor === 0) return;
+          messageCursor--;
+          state.message.splice(messageCursor, 1);
+          refreshMessageAfterEdit();
+        }
+
+        function deleteNextToken() {
+          if (messageCursor === state.message.length) return;
+          state.message.splice(messageCursor, 1);
+          refreshMessageAfterEdit();
+        }
+        const sourceImageBtn = $("sourceImageBtn");
+        const sourceImageFile = $("sourceImageFile");
+        const sourceImageStage = $("sourceImageStage");
+        const sourceImage = $("sourceImage");
+        const sourceMarks = [];
+        let sourceImageUrl = null;
+        let imageRequest = 0;
+        let sourceDrag = null;
+        let sourceImageSave = Promise.resolve();
+        let sourceImageDatabase;
+
+        function openSourceImageDatabase() {
+          sourceImageDatabase ??= new Promise((resolve, reject) => {
+            const request = indexedDB.open(KEY + "-source-image", 1);
+            request.onupgradeneeded = () =>
+              request.result.createObjectStore("reference");
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+            request.onblocked = () =>
+              reject(new Error("El almacenamiento de imágenes está ocupado."));
+          });
+          return sourceImageDatabase;
+        }
+
+        async function withSourceImageStorage(mode, operation) {
+          const database = await openSourceImageDatabase();
+          return new Promise((resolve, reject) => {
+            const transaction = database.transaction("reference", mode);
+            const result = operation(transaction.objectStore("reference"));
+            transaction.oncomplete = () => resolve(result);
+            transaction.onabort = () => reject(transaction.error);
+          });
+        }
+
+        function sourceStorageKeys() {
+          const prefix =
+            activeLanguage === originalLanguage.id ? "" : activeLanguage + ":";
+          return { image: prefix + "image", marks: prefix + "marks" };
+        }
+
+        function saveSourceImage(file) {
+          const keys = sourceStorageKeys();
+          const marks = sourceMarks.map(({ style }) => ({
+            left: style.left,
+            top: style.top,
+            width: style.width,
+            height: style.height,
+          }));
+          sourceImageSave = sourceImageSave
+            .then(() =>
+              withSourceImageStorage("readwrite", (store) => {
+                if (file === null) {
+                  store.delete(keys.image);
+                  store.delete(keys.marks);
+                } else {
+                  if (file !== undefined) store.put(file, keys.image);
+                  store.put(marks, keys.marks);
+                }
+              }),
+            )
+            .catch(() =>
+              toast(
+                "No se pudo guardar la imagen de referencia en el navegador.",
+                true,
+              ),
+            );
+        }
+
+        async function restoreSourceImage() {
+          const keys = sourceStorageKeys();
+          const request = imageRequest;
+          try {
+            await sourceImageSave;
+            if (request !== imageRequest) return;
+            const { image, marks } = await withSourceImageStorage(
+              "readonly",
+              (store) => ({
+                image: store.get(keys.image),
+                marks: store.get(keys.marks),
+              }),
+            );
+            if (request !== imageRequest || !(image.result instanceof Blob))
+              return;
+            displaySourceImage(URL.createObjectURL(image.result));
+            for (const rectangle of marks.result ?? []) {
+              const element = createSourceMark();
+              Object.assign(element.style, rectangle);
+              sourceImageStage.append(element);
+              sourceMarks.push(element);
+            }
+            $("undoSourceMark").disabled = sourceMarks.length === 0;
+          } catch {
+            // El navegador puede restringir el almacenamiento para archivos locales.
+          }
+        }
+
+        function cancelSourceMark() {
+          if (!sourceDrag) return;
+          sourceDrag.element.remove();
+          sourceDrag = null;
+        }
+
+        function setSourceMarking(marking) {
+          if (!marking) cancelSourceMark();
+          sourceImageStage.classList.toggle("is-marking", marking);
+          $("toggleSourceMark").setAttribute("aria-pressed", String(marking));
+        }
+
+        function clearSourceMarks() {
+          cancelSourceMark();
+          while (sourceMarks.length) sourceMarks.pop().remove();
+          $("undoSourceMark").disabled = true;
+        }
+
+        function displaySourceImage(url) {
+          clearSourceMarks();
+          sourceImage.src = url;
+          if (sourceImageUrl) URL.revokeObjectURL(sourceImageUrl);
+          sourceImageUrl = url;
+          $("sourceImagePanel").hidden = false;
+          $("sourceImageScroll").scrollTop = 0;
+          sourceImageBtn.textContent = "Cambiar imagen";
+          setSourceMarking(true);
+        }
+
+        sourceImageBtn.addEventListener("click", () => sourceImageFile.click());
+        sourceImageFile.addEventListener("change", async () => {
+          const file = sourceImageFile.files[0];
+          sourceImageFile.value = "";
+          if (!file) return;
+          const request = ++imageRequest;
+          const url = URL.createObjectURL(file);
+          const preview = new Image();
+          preview.src = url;
+          try {
+            await preview.decode();
+          } catch {
+            URL.revokeObjectURL(url);
+            if (request === imageRequest)
+              toast("No se pudo abrir la imagen.", true);
+            return;
+          }
+          if (request !== imageRequest) {
+            URL.revokeObjectURL(url);
+            return;
+          }
+          displaySourceImage(url);
+          saveSourceImage(file);
+          $("paper").focus({ preventScroll: true });
+        });
+
+        $("toggleSourceMark").addEventListener("click", () => {
+          setSourceMarking(!sourceImageStage.classList.contains("is-marking"));
+        });
+        $("undoSourceMark").addEventListener("click", () => {
+          sourceMarks.pop()?.remove();
+          saveSourceImage();
+          $("undoSourceMark").disabled = sourceMarks.length === 0;
+        });
+        function hideSourceImage() {
+          imageRequest++;
+          clearSourceMarks();
+          sourceImage.removeAttribute("src");
+          if (sourceImageUrl) URL.revokeObjectURL(sourceImageUrl);
+          sourceImageUrl = null;
+          $("sourceImagePanel").hidden = true;
+          sourceImageBtn.textContent = "Agregar imagen";
+          setSourceMarking(false);
+        }
+        $("removeSourceImage").addEventListener("click", () => {
+          hideSourceImage();
+          saveSourceImage(null);
+          $("paper").focus({ preventScroll: true });
+        });
+
+        function sourceImagePoint(event) {
+          const { left, top, width, height } =
+            sourceImageStage.getBoundingClientRect();
+          return {
+            x: clamp(((event.clientX - left) / width) * 100, 0, 100),
+            y: clamp(((event.clientY - top) / height) * 100, 0, 100),
+          };
+        }
+
+        function updateSourceMark(event) {
+          const point = sourceImagePoint(event);
+          const { origin, element } = sourceDrag;
+          const width = Math.abs(origin.x - point.x);
+          const height = Math.abs(origin.y - point.y);
+          Object.assign(element.style, {
+            left: Math.min(origin.x, point.x) + "%",
+            top: Math.min(origin.y, point.y) + "%",
+            width: width + "%",
+            height: height + "%",
+            visibility: width && height ? "visible" : "hidden",
+          });
+          return width > 0 && height > 0;
+        }
+
+        function createSourceMark() {
+          const element = document.createElement("span");
+          element.className = "source-mark";
+          element.setAttribute("aria-hidden", "true");
+          return element;
+        }
+
+        sourceImageStage.addEventListener("pointerdown", (event) => {
+          if (
+            event.button !== 0 ||
+            sourceDrag ||
+            !sourceImage.complete ||
+            !sourceImage.naturalWidth ||
+            !sourceImageStage.classList.contains("is-marking")
+          )
+            return;
+          event.preventDefault();
+          const element = createSourceMark();
+          sourceDrag = {
+            id: event.pointerId,
+            origin: sourceImagePoint(event),
+            element,
+          };
+          updateSourceMark(event);
+          sourceImageStage.append(element);
+          sourceImageStage.setPointerCapture(event.pointerId);
+        });
+        sourceImageStage.addEventListener("pointermove", (event) => {
+          if (sourceDrag?.id === event.pointerId) updateSourceMark(event);
+        });
+        sourceImageStage.addEventListener("pointerup", (event) => {
+          if (sourceDrag?.id !== event.pointerId) return;
+          if (!updateSourceMark(event)) {
+            cancelSourceMark();
+            return;
+          }
+          sourceMarks.push(sourceDrag.element);
+          sourceDrag = null;
+          $("undoSourceMark").disabled = false;
+          saveSourceImage();
+          $("paper").focus({ preventScroll: true });
+        });
+        for (const eventName of ["pointercancel", "lostpointercapture"]) {
+          sourceImageStage.addEventListener(eventName, (event) => {
+            if (sourceDrag?.id === event.pointerId) cancelSourceMark();
+          });
+        }
+
+        const languageSelect = $("languageSelect");
+        const newLanguageBtn = $("newLanguageBtn");
+        const renameLanguageBtn = $("renameLanguageBtn");
+
+        function renderLanguages() {
+          languageSelect.replaceChildren();
+          for (const language of languages)
+            languageSelect.add(new Option(language.name, language.id));
+          languageSelect.value = activeLanguage;
+        }
+
+        function languageName(question, current = "", id = null) {
+          const name = prompt(question, current)?.trim().slice(0, 60);
+          if (!name) return null;
+          if (
+            languages.some(
+              (language) =>
+                language.id !== id &&
+                normalizeKey(language.name) === normalizeKey(name),
+            )
+          ) {
+            toast("Ya existe un lenguaje con ese nombre.", true);
+            return null;
+          }
+          return name;
+        }
+
+        function switchLanguage(language, creating = false) {
+          if (
+            dirty &&
+            !confirm("Hay cambios sin guardar en el glifo. ¿Descartarlos?")
+          ) {
+            languageSelect.value = activeLanguage;
+            return;
+          }
+          let next;
+          try {
+            next = creating ? emptyState() : loadLanguageState(language.id);
+          } catch {
+            languageSelect.value = activeLanguage;
+            toast("No se pudo abrir el lenguaje.", true);
+            return;
+          }
+          languageStates.set(activeLanguage, state);
+          if (creating) languages.push(language);
+          activeLanguage = language.id;
+          state = next;
+          languageStates.set(activeLanguage, state);
+          writeLanguageRegistry();
+          renderLanguages();
+          hideSourceImage();
+          messageCursor = state.message.length;
+          cursorColumn = null;
+          wordBeingEdited = null;
+          $("reference").hidden = true;
+          $("referenceBtn").textContent = "Ver referencias";
+          $("referenceBtn").setAttribute("aria-pressed", "false");
+          loadEditor(null, true);
+          renderMessage();
+          placeMessageCaret(true);
+          restoreSourceImage();
+          if (creating) {
+            showView($("editorTab"));
+            $("glyphName").focus();
+          }
+        }
+
+        languageSelect.addEventListener("change", () => {
+          const language = languages.find(
+            (item) => item.id === languageSelect.value,
+          );
+          if (language && language.id !== activeLanguage)
+            switchLanguage(language);
+        });
+        newLanguageBtn.addEventListener("click", () => {
+          const name = languageName("Nombre del nuevo lenguaje");
+          if (name) switchLanguage({ id: newId(), name }, true);
+        });
+        renameLanguageBtn.addEventListener("click", () => {
+          const language = languages.find((item) => item.id === activeLanguage);
+          const name = languageName(
+            "Nombre del lenguaje",
+            language.name,
+            language.id,
+          );
+          if (!name) return;
+          language.name = name;
+          writeLanguageRegistry();
+          renderLanguages();
+        });
+
+        const toggleKeyboardBtn = $("toggleKeyboardBtn");
+        toggleKeyboardBtn.addEventListener("click", () => {
+          const keyboard = $("virtualKeyboard");
+          keyboard.hidden = !keyboard.hidden;
+          toggleKeyboardBtn.setAttribute(
+            "aria-expanded",
+            String(!keyboard.hidden),
+          );
+          toggleKeyboardBtn.textContent = keyboard.hidden
+            ? "Mostrar teclado"
+            : "Ocultar teclado";
+          $("paper").focus({ preventScroll: true });
+          placeMessageCaret(true);
+        });
+
+        const invertMessageBtn = $("invertMessageBtn");
+        invertMessageBtn.addEventListener("click", () => {
+          const inverted =
+            invertMessageBtn.getAttribute("aria-pressed") !== "true";
+          $("message").classList.toggle("message-inverted", inverted);
+          invertMessageBtn.setAttribute("aria-pressed", String(inverted));
+          cursorColumn = null;
+          placeMessageCaret(true);
+          $("paper").focus({ preventScroll: true });
+        });
+
+        const expandComposerBtn = $("expandComposerBtn");
+        function setComposerExpanded(expanded) {
+          $("appShell").classList.toggle("composer-expanded", expanded);
+          expandComposerBtn.setAttribute("aria-pressed", String(expanded));
+          expandComposerBtn.textContent = expanded
+            ? "Salir del modo ampliado"
+            : "Ampliar lienzo y teclado";
+        }
+        expandComposerBtn.addEventListener("click", () => {
+          setComposerExpanded(
+            expandComposerBtn.getAttribute("aria-pressed") !== "true",
+          );
+          $("paper").focus({ preventScroll: true });
+        });
+
+        const zoomInput = $("messageZoom");
+        const zoomStorageKey = KEY + "-message-zoom";
+        function applyMessageZoom() {
+          const percent = zoomInput.valueAsNumber;
+          $("message").style.zoom = String(percent / 100);
+          $("messageZoomValue").textContent = percent + "%";
+        }
+        try {
+          const savedZoom = Number(localStorage.getItem(zoomStorageKey));
+          if (
+            savedZoom >= Number(zoomInput.min) &&
+            savedZoom <= Number(zoomInput.max)
+          ) {
+            zoomInput.valueAsNumber = savedZoom;
+          }
+        } catch {
+          /* El zoom sigue disponible durante la sesión. */
+        }
+        applyMessageZoom();
+        zoomInput.addEventListener("input", () => {
+          applyMessageZoom();
+          try {
+            localStorage.setItem(zoomStorageKey, zoomInput.value);
+          } catch {
+            /* El zoom sigue disponible durante la sesión. */
+          }
+        });
+        $("punctuationPicker").addEventListener("change", (event) => {
+          const picker = event.currentTarget;
+          if (!isPunctuation(picker.value)) return;
+          insert({ type: "punctuation", text: picker.value });
+          picker.value = "";
+          $("paper").focus({ preventScroll: true });
+        });
+        $("spaceBtn").addEventListener("click", () =>
+          insert({ type: "space" }),
+        );
+        $("newlineBtn").addEventListener("click", () =>
+          insert({ type: "newline" }),
+        );
+        $("backspaceBtn").addEventListener("click", backspace);
+        $("clearMessageBtn").addEventListener("click", () => {
+          if (state.message.length && confirm("¿Borrar todo el mensaje?")) {
+            state.message = [];
+            messageCursor = 0;
+            refreshMessageAfterEdit();
+            toast("Mensaje borrado.");
+          }
+        });
+        $("referenceBtn").addEventListener("click", () => {
+          const show = $("reference").hidden;
+          $("reference").hidden = !show;
+          $("referenceBtn").textContent = show
+            ? "Ocultar referencias"
+            : "Ver referencias";
+          $("referenceBtn").setAttribute("aria-pressed", String(show));
+        });
+        $("copyRefBtn").addEventListener("click", async () => {
+          const ref = referenceString();
+          try {
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(ref);
+            } else {
+              const box = document.createElement("textarea");
+              box.value = ref;
+              box.style.position = "fixed";
+              box.style.opacity = "0";
+              document.body.append(box);
+              box.select();
+              const ok = document.execCommand("copy");
+              box.remove();
+              if (!ok) throw Error("clipboard");
+            }
+            toast("Referencias copiadas.");
+          } catch {
+            $("reference").hidden = false;
+            $("referenceBtn").textContent = "Ocultar referencias";
+            $("referenceBtn").setAttribute("aria-pressed", "true");
+            toast("Seleccioná el texto de referencia para copiarlo.", true);
+          }
+        });
+        function currentWordAction() {
+          const action = wordKeyboardActions.get(messageCursor);
+          const previousToken = state.message[messageCursor - 1];
+          return (
+            action ??
+            (previousToken && previousToken.type !== "glyph"
+              ? wordKeyboardActions.get(messageCursor - 1)
+              : null)
+          );
+        }
+
+        document.addEventListener("keydown", (e) => {
+          if ($("composerPanel").hidden || e.defaultPrevented) return;
+          if (
+            e.key === "Escape" &&
+            !e.isComposing &&
+            expandComposerBtn.getAttribute("aria-pressed") === "true"
+          ) {
+            e.preventDefault();
+            setComposerExpanded(false);
+            return;
+          }
+          if (
+            (e.key === "Enter" || e.key === " ") &&
+            (e.target === expandComposerBtn ||
+              e.target === invertMessageBtn ||
+              e.target === toggleKeyboardBtn ||
+              e.target === sourceImageBtn ||
+              e.target.closest?.(
+                ".language-controls button, .source-image-tools button, .word-completion",
+              ))
+          )
+            return;
+          const target = e.target;
+          if (
+            target instanceof HTMLElement &&
+            (target.matches('input,textarea,select,[contenteditable="true"]') ||
+              target.isContentEditable)
+          )
+            return;
+          if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+          if (e.key === " " && target.closest?.(".message-word button")) return;
+          if (
+            e.key === "Tab" &&
+            !e.shiftKey &&
+            (target === document.body ||
+              target === document.documentElement ||
+              $("paper").contains(target) ||
+              target.closest?.(".keyboard-grid"))
+          ) {
+            const action = currentWordAction();
+            if (action?.next) {
+              e.preventDefault();
+              action.next();
+              $("paper").focus({ preventScroll: true });
+              return;
+            }
+          }
+          const g = shortcuts.get(normalizeKey(e.key));
+          if (g) {
+            e.preventDefault();
+            insert({ type: "glyph", id: g.id });
+            return;
+          }
+          if (arrowKeys.includes(e.key)) {
+            e.preventDefault();
+            moveMessageCursor(e.key);
+          } else if (isPunctuation(e.key)) {
+            e.preventDefault();
+            insert({ type: "punctuation", text: e.key });
+          } else if (e.key === "Delete") {
+            e.preventDefault();
+            deleteNextToken();
+          } else if (e.key === "Backspace") {
+            e.preventDefault();
+            backspace();
+          } else if (e.key === " ") {
+            e.preventDefault();
+            insert({ type: "space" });
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (e.repeat) return;
+            const action = currentWordAction();
+            if (action) action.accept();
+            else insert({ type: "newline" });
+          }
+        });
+        function downloadBlob(blob, filename) {
+          const a = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+          a.href = url;
+          a.download = filename;
+          document.body.append(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        $("exportBtn").addEventListener("click", () => {
+          downloadBlob(
+            new Blob([JSON.stringify(state, null, 2)], {
+              type: "application/json",
+            }),
+            "enigma-alfabeto.json",
+          );
+          toast("Respaldo exportado.");
+        });
+        $("reloadBtn").addEventListener("click", async () => {
+          await sourceImageSave;
+          window.location.reload();
+        });
+        $("importBtn").addEventListener("click", () => $("importFile").click());
+        $("importFile").addEventListener("change", async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (!file) return;
+          const targetLanguage = activeLanguage;
+          try {
+            if (file.size > 20 * 1024 * 1024)
+              throw new Error("El respaldo pesa más de 20 MB.");
+            const next = validate(JSON.parse(await file.text()));
+            if (targetLanguage !== activeLanguage) return;
+            if (
+              (state.glyphs.length ||
+                state.message.length ||
+                state.dictionary.length ||
+                state.translation ||
+                dirty) &&
+              !confirm(
+                `El respaldo tiene ${next.glyphs.length} caracteres. ¿Reemplazar el alfabeto, el mensaje y las traducciones actuales? Exportá primero si querés conservarlos.`,
+              )
+            )
+              return;
+            state = next;
+            messageCursor = state.message.length;
+            cursorColumn = null;
+            wordBeingEdited = null;
+            saveState();
+            loadEditor(null, true);
+            renderMessage();
+            toast("Alfabeto importado.");
+          } catch (err) {
+            toast("No se pudo importar: " + err.message, true);
+          }
+        });
+        function paintGlyph(ctx, g, x, y, size) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.scale(size / 320, size / 320);
+          ctx.strokeStyle = "#26323d";
+          ctx.fillStyle = "#26323d";
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          for (const s of g.strokes) {
+            ctx.beginPath();
+            if (s.points.length === 1) {
+              ctx.arc(
+                s.points[0][0],
+                s.points[0][1],
+                s.width / 2,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+            } else {
+              ctx.lineWidth = s.width;
+              ctx.moveTo(...s.points[0]);
+              for (const p of s.points.slice(1)) ctx.lineTo(...p);
+              ctx.stroke();
+            }
+          }
+          ctx.restore();
+        }
+        const pngFormats = {
+          original: {},
+          palabras: { words: true },
+          equivalencias: { words: true, labels: true },
+          invertido: { labels: true, inverted: true },
+          "invertido-palabras": { words: true, labels: true, inverted: true },
+        };
+
+        function layoutPng(message, dictionary, format) {
+          const width = 1080;
+          const pad = 40;
+          const cell = format.inverted ? 72 : 107;
+          const contentHeight = format.inverted
+            ? 98
+            : format.labels
+              ? 128
+              : 100;
+          const rowHeight = contentHeight + (format.words ? 36 : 0) + 16;
+          const entries = new Map(
+            dictionary.map((entry) => [JSON.stringify(entry.ids), entry.text]),
+          );
+          const items = [];
+          const words = [];
+          let x = pad;
+          let y = pad;
+          function nextLine() {
+            x = pad;
+            y += rowHeight;
+          }
+          function reserve(size) {
+            if (x + size > width - pad && x > pad) nextLine();
+          }
+
+          for (let index = 0; index < message.length; ) {
+            const token = message[index];
+            if (token.type === "glyph") {
+              const start = index;
+              while (message[index]?.type === "glyph") index++;
+              const run = message.slice(start, index);
+              const key = JSON.stringify(run.map((glyph) => glyph.id));
+              const annotation =
+                format.words &&
+                (index < message.length || token.annotation === key) &&
+                entries.get(key);
+              if (annotation && run.length * cell <= width - 2 * pad)
+                reserve(run.length * cell);
+              let wordLeft = x;
+              for (const glyph of run) {
+                const previousRow = y;
+                reserve(cell);
+                if (y !== previousRow) wordLeft = x;
+                items.push({ token: glyph, x, y });
+                x += cell;
+              }
+              if (annotation)
+                words.push({
+                  text: annotation,
+                  x: (wordLeft + x) / 2,
+                  y: y + contentHeight + 27,
+                  width: x - wordLeft,
+                });
+              continue;
+            }
+            if (token.type === "newline") {
+              nextLine();
+            } else {
+              const size = token.type === "space" ? 36 : 58;
+              reserve(size);
+              if (token.type === "punctuation") items.push({ token, x, y });
+              x += size;
+            }
+            index++;
+          }
+          return {
+            width,
+            height: Math.max(200, y + rowHeight - 16 + pad),
+            contentHeight,
+            cell,
+            items,
+            words,
+          };
+        }
+
+        $("pngBtn").addEventListener("click", () => {
+          if (!state.message.length) return;
+          const mode = $("pngFormat").value;
+          const format = pngFormats[mode];
+          const { width, height, contentHeight, cell, items, words } =
+            layoutPng(state.message, state.dictionary, format);
+          if (height > 16000) {
+            toast("El mensaje es demasiado largo para una sola imagen.", true);
+            return;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            toast("No se pudo crear la imagen.", true);
+            return;
+          }
+          ctx.fillStyle = "#f7f8f4";
+          ctx.fillRect(0, 0, width, height);
+          ctx.fillStyle = "#26323d";
+          ctx.textAlign = "center";
+          const glyphs = new Map(
+            state.glyphs.map((glyph) => [glyph.id, glyph]),
+          );
+          for (const { token, x, y } of items) {
+            if (token.type === "punctuation") {
+              ctx.font = "600 52px sans-serif";
+              ctx.textAlign = mode === "original" ? "left" : "center";
+              ctx.fillText(
+                token.text,
+                mode === "original" ? x : x + 29,
+                y + contentHeight - 8,
+              );
+              ctx.textAlign = "center";
+              continue;
+            }
+            const glyph = glyphs.get(token.id);
+            if (!glyph) continue;
+            if (format.inverted) {
+              paintGlyph(ctx, glyph, x + (cell - 44) / 2, y, 44);
+              ctx.font = "700 46px sans-serif";
+              ctx.fillText(
+                glyphEquivalent(glyph),
+                x + cell / 2,
+                y + 90,
+                cell - 6,
+              );
+            } else {
+              if (format.labels) {
+                ctx.font = "600 23px sans-serif";
+                ctx.fillText(glyphEquivalent(glyph), x + 50, y + 24, cell - 6);
+              }
+              paintGlyph(ctx, glyph, x, y + (format.labels ? 28 : 0), 100);
+            }
+          }
+          ctx.font = "700 24px sans-serif";
+          ctx.fillStyle = "#264f44";
+          for (const word of words)
+            ctx.fillText(word.text, word.x, word.y, word.width);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const suffix = mode === "original" ? "" : "-" + mode;
+              downloadBlob(blob, "enigma-mensaje" + suffix + ".png");
+              toast("Mensaje exportado.");
+            } else toast("No se pudo crear la imagen.", true);
+          }, "image/png");
+        });
+        window.addEventListener("beforeunload", (e) => {
+          if (dirty) {
+            e.preventDefault();
+            e.returnValue = "";
+          }
+        });
+        renderLanguages();
+        drawDraft();
+        updateEditor();
+        renderKeyboard();
+        renderEditorGlyphs();
+        renderMessage();
+        restoreSourceImage();
+      })();
+    </script>
+  </body>
+</html>
